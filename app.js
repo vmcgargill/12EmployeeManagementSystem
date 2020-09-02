@@ -4,6 +4,11 @@ const path = require("path");
 const { timeStamp } = require("console");
 
 const Start = () => {
+    console.log("Welcome to the Employee Management System");
+    MainMenu();
+}
+
+const MainMenu = () => {
     inquirer.prompt({
         type: "list",
         message: "What would you like to do?",
@@ -28,7 +33,7 @@ const Start = () => {
             "Exit"
         ]
     }).then((response) => {
-        let start = response.start;
+        var start = response.start;
 
         if (start === "Exit") Exit(); 
         else if (start === "View a Specific Employee") ViewSpecificEmployee();
@@ -37,7 +42,6 @@ const Start = () => {
         else if (start === "View All Roles") ViewAllRoles();
         else if (start === "View All Employees by Roles") ViewEmployeesByRole();
         else if (start === "View All Employees by Department") ViewEmployeesByDepartment();
-
         else if (start === "View All Employees by Manager") ViewEmployeesByManager();
         else if (start === "View Utilized Budget of a Department") ViewUBDepartment();
         else if (start === "View Utilized Budget of a Role") ViewUBRole();
@@ -47,12 +51,29 @@ const Start = () => {
         else if (start === "Update an Employee") UpdateEmployee();
         else if (start === "Delete an Employee") DeleteEmployee();
         else if (start === "Delete a Department") DeleteDepartment();
-        else if (start === "Delete a Role") DeletRole();
+        else if (start === "Delete a Role") DeleteRole();
     })
 }
 
-console.log("Welcome to the Employee Management System")
-Start();
+const Next = () => {
+    inquirer.prompt({
+        type: "list",
+        message: "Would you like to return to the main menu or exit the application?",
+        name: "next",
+        choices: [
+            "Return to Main Menu",
+            "Exit"
+        ]
+    }).then((response) => {
+        var next = response.next;
+
+        if (next === "Return to Main Menu") {
+            MainMenu();
+        } else if (next === "Exit") {
+            Exit();
+        }
+    })
+}
 
 const Exit = () => {
     console.log("Goodbye");
@@ -118,6 +139,8 @@ const DeleteDepartment = () => {
     console.log("Delete a Department");
 }
 
-const DeletRole = () => {
+const DeleteRole = () => {
     console.log("Delete a Role");
 }
+
+Start();

@@ -1,10 +1,10 @@
 {
   "name": "12employeemanagementsystem",
   "version": "1.0.0",
-  "description": "App that manages Employee information.",
+  "description": "An app the manages a employee database",
   "main": "app.js",
   "scripts": {
-    "test": "npm test"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
