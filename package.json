@@ -1,0 +1,27 @@
+{
+  "name": "12employeemanagementsystem",
+  "version": "1.0.0",
+  "description": "App that manages Employee information.",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vmcgargill/12EmployeeManagementSystem.git"
+  },
+  "keywords": [
+    "Employee",
+    "Management",
+    "System"
+  ],
+  "author": "Vincent J McGargill",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vmcgargill/12EmployeeManagementSystem/issues"
+  },
+  "homepage": "https://github.com/vmcgargill/12EmployeeManagementSystem#readme",
+  "dependencies": {
+    "inquirer": "^7.3.3"
+  }
+}
