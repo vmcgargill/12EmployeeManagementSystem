@@ -18,7 +18,6 @@ connection.connect(function(err) {
     Start();
 });
 
-
 const Start = () => {
     console.log("Welcome to the Employee Management System");
     MainMenu();
@@ -34,6 +33,7 @@ const MainMenu = () => {
             "View All Employees",
             "View All Departments",
             "View All Roles",
+            "View All Roles by Department",
             "View All Employees by Roles",
             "View All Employees by Department",
             "View All Employees by Manager",
@@ -56,6 +56,7 @@ const MainMenu = () => {
         else if (start === "View All Employees") ViewAllEmployees();
         else if (start === "View All Departments") ViewAllDepartments();
         else if (start === "View All Roles") ViewAllRoles();
+        else if (start === "View All Roles by Department") ViewRolesByDepartment();
         else if (start === "View All Employees by Roles") ViewEmployeesByRole();
         else if (start === "View All Employees by Department") ViewEmployeesByDepartment();
         else if (start === "View All Employees by Manager") ViewEmployeesByManager();
@@ -152,11 +153,39 @@ const ViewAllRoles = () => {
     });
 }
 
+const ViewRolesByDepartment = () => {
+    console.log("View All Roles by Department");
+    connection.query("SELECT * FROM department", function(err, res) {
+        if (err) throw err;
+        
+        let DepartmentArray = new Array();
+        res.forEach((department) => {
+            var NameString = department.name;
+            DepartmentArray.push(NameString)
+        });
+        
+        inquirer.prompt({
+            type: "list",
+            message: "Please select a Department to View All Roles By:",
+            name: "department",
+            choices: DepartmentArray
+        }).then(function(response) {
+            let department = response.department;
+            let index = DepartmentArray.indexOf(department)
+            let departmentId = res[index].id;
+            connection.query("SELECT * FROM employee_role WHERE department_id=" + departmentId, function(error, result) {
+                if (error) throw error;
+                console.log(result)
+                Next()
+            })
+        });
+    });
+}
+
 const ViewEmployeesByRole = () => {
     console.log("View All Employees by Roles");
     connection.query("SELECT * FROM employee_role", function(err, res) {
         if (err) throw err;
-
         
         let RoleArray = new Array();
         res.forEach((role) => {
@@ -179,12 +208,36 @@ const ViewEmployeesByRole = () => {
                 Next()
             })
         });
-
     });
 }
 
 const ViewEmployeesByDepartment = () => {
     console.log("View All Employees by Department");
+    connection.query("SELECT * FROM department", function(err, res) {
+        if (err) throw err;
+        
+        let DepartmentArray = new Array();
+        res.forEach((department) => {
+            var NameString = department.name;
+            DepartmentArray.push(NameString)
+        });
+        
+        inquirer.prompt({
+            type: "list",
+            message: "Please select a Department to View All Employees By:",
+            name: "department",
+            choices: DepartmentArray
+        }).then(function(response) {
+            let department = response.department;
+            let index = DepartmentArray.indexOf(department)
+            let departmentId = res[index].id;
+            connection.query("SELECT * FROM employee WHERE department_id=" + departmentId, function(error, result) {
+                if (error) throw error;
+                console.log(result)
+                Next()
+            })
+        });
+    });
 }
 
 const ViewEmployeesByManager = () => {
@@ -226,3 +279,4 @@ const DeleteDepartment = () => {
 const DeleteRole = () => {
     console.log("Delete a Role");
 }
+
