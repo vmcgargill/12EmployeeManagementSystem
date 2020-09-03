@@ -112,8 +112,9 @@ const ViewSpecificEmployee = () => {
             name: "employee",
             choices: EmployeeArray
         }).then(function(response) {
-            var employee = response.employee;
-            var emplyeeId = EmployeeArray.indexOf(employee) + 1;
+            let employee = response.employee;
+            let index = EmployeeArray.indexOf(employee)
+            let emplyeeId = res[index].id;
             connection.query("SELECT * FROM employee WHERE id=" + emplyeeId, function(error, result) {
                 if (error) throw error;
                 console.log(result)
@@ -129,7 +130,7 @@ const ViewAllEmployees = () => {
     connection.query("SELECT * FROM employee", function(err, res) {
         if (err) throw err;
         console.log(res);
-        Next()
+        Next();
     });
 }
 
