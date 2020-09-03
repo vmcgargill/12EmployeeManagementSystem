@@ -52,20 +52,20 @@ VALUES ("Chief Executive Official", 1000000.00, 1),
 ("Sales Represenative", 60000.00, 3), 
 ("Marketing Intern", 20000.00, 3), 
 -- Production
-("Production Associate", 100000.00, 4), 
-("Customer Service Represenative", 100000.00, 4),  
-("Order Specialist", 100000.00, 4), 
+("Production Associate", 40000.00, 4), 
+("Customer Service Represenative", 40000.00, 4),  
+("Order Specialist", 40000.00, 4), 
 -- IT
-("Software Developer", 100000.00, 5), 
-("Desktop Support Specialist", 100000.00, 5),
+("Software Developer", 80000.00, 5), 
+("Desktop Support Specialist", 40000.00, 5),
 -- HR
-("Human Resource Coordinator", 50000.00, 6), 
+("Human Resource Coordinator", 40000.00, 6), 
 ("Human Resource Assistant", 20000.00, 6), 
 -- Accounting & Finance
 ("Accountant", 50000.00, 7), 
 ("Bookkeeper", 40000.00, 7), 
 ("Financial Analyst", 50000.00, 7), 
-("Finance Intern", 50000.00, 7);
+("Finance Intern", 20000.00, 7);
 
 -- Insert Employees Values
 INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id)

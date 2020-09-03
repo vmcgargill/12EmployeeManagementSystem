@@ -292,6 +292,33 @@ const ViewEmployeesByManager = () => {
 
 const ViewUBDepartment = () => {
     console.log("View Utilized Budget of a Department");
+    connection.query("SELECT * FROM department", function(err, res) {
+        if (err) throw err;
+        
+        let DepartmentArray = new Array();
+        res.forEach((department) => {
+            var NameString = department.name;
+            DepartmentArray.push(NameString)
+        });
+
+        inquirer.prompt({
+            type: "list",
+            message: "Please select a Department to View the Utilized Budget By:",
+            name: "department",
+            choices: DepartmentArray
+        }).then(function(response) {
+            let department = response.department;
+            let index = DepartmentArray.indexOf(department)
+            let departmentId = res[index].id;
+            connection.query("SELECT salary FROM employee_role WHERE department_id=" + departmentId, function(error, result) {
+                if (error) throw error;
+                var SumUtilizedBudget = 0;
+                result.forEach((role) => SumUtilizedBudget += role.salary)
+                console.log("Current budget for " + department + " department is: " + USDformatter.format(SumUtilizedBudget))
+                Next()
+            })
+        });
+    })
 }
 
 const ViewUBRole = () => {
@@ -325,3 +352,8 @@ const DeleteDepartment = () => {
 const DeleteRole = () => {
     console.log("Delete a Role");
 }
+
+var USDformatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+})
