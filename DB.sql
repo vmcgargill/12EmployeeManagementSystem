@@ -1,33 +1,37 @@
+-- Create Database
 DROP DATABASE IF EXISTS employee_db;
 CREATE DATABASE employee_db;
 USE employee_db;
 
+-- Create Employee Table
 CREATE TABLE employee (
-  id int NOT NULL,
+  id int NOT NULL primary key AUTO_INCREMENT,
   first_name VARCHAR(30) NOT NULL,
   last_name VARCHAR(30) NOT NULL,
   role_id int NOT NULL,
   manager_id int NOT NULL
 );
 
+-- Create Employee Role Table 
 CREATE TABLE employee_role (
-  id int NOT NULL,
+  id int NOT NULL primary key AUTO_INCREMENT,
   title VARCHAR(30) NOT NULL,
   salary DECIMAL NOT NULL,
   department_id int NOT NULL
 );
 
+-- Create Department Table
 CREATE TABLE department (
-  id int NOT NULL,
-  name VARCHAR(30) NOT NULL,
+  id int NOT NULL primary key AUTO_INCREMENT,
+  name VARCHAR(30) NOT NULL
 );
 
-
+-- Inser Department Values
 INSERT INTO department (name)
 VALUES ("Executive"), ("Management"), ("Sales"), ("Production"), 
-("Information Technology"), ("Human Resources"), ("Accounting & Finance")
+("Information Technology"), ("Human Resources"), ("Accounting & Finance");
 
-
+-- Insert Employee Roles
 INSERT INTO employee_role (title, salary, department_id)
 -- Executive Department
 VALUES ("Chief Executive Official", 1000000.00, 1), 
@@ -37,32 +41,32 @@ VALUES ("Chief Executive Official", 1000000.00, 1),
 ("Chief Human Resource Officer", 500000.00, 1), 
 ("Chief Financial Officer", 500000.00, 1), 
 -- Management Department
-("Sales Manager", 100000.00), 
-("Production Manager", 100000.00), 
-("IT Manager", 100000.00), 
-("HR Manager", 100000.00), 
-("Finance Manager", 100000.00), 
-("Accounting Manager", 100000.00), 
+("Sales Manager", 100000.00, 2), 
+("Production Manager", 100000.00, 2), 
+("IT Manager", 100000.00, 2), 
+("HR Manager", 100000.00, 2), 
+("Finance Manager", 100000.00, 2), 
+("Accounting Manager", 100000.00, 2), 
 -- Sales
-("Sales Represenative", 60000.00), 
-("Marketing Intern", 20000.00), 
+("Sales Represenative", 60000.00, 3), 
+("Marketing Intern", 20000.00, 3), 
 -- Production
-("Production Associate", 100000.00), 
-("Customer Service Represenative", 100000.00),  
-("Order Specialist", 100000.00), 
+("Production Associate", 100000.00, 4), 
+("Customer Service Represenative", 100000.00, 4),  
+("Order Specialist", 100000.00, 4), 
 -- IT
-("Software Developer", 100000.00), 
-("Desktop Support Specialist", 100000.00),
+("Software Developer", 100000.00, 5), 
+("Desktop Support Specialist", 100000.00, 5),
 -- HR
-("Human Resource Coordinator", 50000.00), 
-("Human Resource Assistant", 20000.00), 
+("Human Resource Coordinator", 50000.00, 6), 
+("Human Resource Assistant", 20000.00, 6), 
 -- Accounting & Finance
-("Accountant", 50000.00), 
-("Bookkeeper", 40000.00), 
-("Financial Analyst", 50000.00), 
-("Finance Intern", 50000.00)
+("Accountant", 50000.00, 7), 
+("Bookkeeper", 40000.00, 7), 
+("Financial Analyst", 50000.00, 7), 
+("Finance Intern", 50000.00, 7);
 
-
+-- Insert Employees Values
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES 
 -- Executives
@@ -120,4 +124,9 @@ VALUES
 ("Vlad", "Dracula", 24, 12),
 ("Elizabeth", "Báthory", 24, 12),
 -- Finance Intern
-("Van", "Helsing", 25, 12)
+("Van", "Helsing", 25, 12);
+
+-- To see data
+-- SELECT * FROM department;
+-- SELECT * FROM employee_role;
+-- SELECT * FROM employee;
