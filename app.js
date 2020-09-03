@@ -104,7 +104,7 @@ const ViewSpecificEmployee = () => {
         res.forEach((employee) => {
             var NameString = employee.first_name + " " + employee.last_name
             EmployeeArray.push(NameString)
-        })
+        });
 
         inquirer.prompt({
             type: "list",
@@ -130,7 +130,7 @@ const ViewAllEmployees = () => {
     connection.query("SELECT * FROM employee", function(err, res) {
         if (err) throw err;
         console.log(res);
-        Next();
+        Next()
     });
 }
 
@@ -154,6 +154,33 @@ const ViewAllRoles = () => {
 
 const ViewEmployeesByRole = () => {
     console.log("View All Employees by Roles");
+    connection.query("SELECT * FROM employee_role", function(err, res) {
+        if (err) throw err;
+
+        
+        let RoleArray = new Array();
+        res.forEach((role) => {
+            var NameString = role.title;
+            RoleArray.push(NameString)
+        });
+        
+        inquirer.prompt({
+            type: "list",
+            message: "Please select a Role to View All Employees By:",
+            name: "role",
+            choices: RoleArray
+        }).then(function(response) {
+            let role = response.role;
+            let index = RoleArray.indexOf(role)
+            let roleId = res[index].id;
+            connection.query("SELECT * FROM employee WHERE role_id=" + roleId, function(error, result) {
+                if (error) throw error;
+                console.log(result)
+                Next()
+            })
+        });
+
+    });
 }
 
 const ViewEmployeesByDepartment = () => {
