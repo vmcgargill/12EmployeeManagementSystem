@@ -242,6 +242,35 @@ const ViewEmployeesByDepartment = () => {
 
 const ViewEmployeesByManager = () => {
     console.log("View All Employees by Manager");
+    connection.query("SELECT * FROM department WHERE name='Management'", function(err, res) {
+        if (err) throw err;
+        let ManagementDepartmentId = res[0].id
+        connection.query("SELECT * FROM employee WHERE department_id=" + ManagementDepartmentId, function(error, result) {
+            if (error) throw error;
+            
+            let ManagerArray = new Array();
+            result.forEach((manager) => {
+                var NameString = manager.first_name + " " + manager.last_name;
+                ManagerArray.push(NameString)
+            });
+
+            inquirer.prompt({
+                type: "list",
+                message: "Please select a Manager to View All Employees By:",
+                name: "manager",
+                choices: ManagerArray
+            }).then(function(response) {
+                let manager = response.manager;
+                let index = ManagerArray.indexOf(manager)
+                let managerId = result[index].id;
+                connection.query("SELECT * FROM employee WHERE manager_id=" + managerId, function(errormsg, resultmsg) {
+                    if (errormsg) throw errormsg;
+                    console.log(resultmsg)
+                    Next()
+                })
+            });
+        })
+    });
 }
 
 const ViewUBDepartment = () => {
