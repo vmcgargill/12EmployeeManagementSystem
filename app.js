@@ -290,6 +290,7 @@ const ViewEmployeesByManager = () => {
     });
 }
 
+// Views the total utilized budget for each department by adding up employee salaries for that department
 const ViewUBDepartment = () => {
     console.log("View Utilized Budget of a Department");
     connection.query("SELECT * FROM department", function(err, res) {
@@ -321,8 +322,36 @@ const ViewUBDepartment = () => {
     })
 }
 
+// Views the total utilized budget for each role by adding up employee salaries for that role
 const ViewUBRole = () => {
     console.log("View Utilized Budget of a Role");
+    connection.query("SELECT * FROM employee_role", function(err, res) {
+        if (err) throw err;
+        
+        let RoleArray = new Array();
+        res.forEach((role) => {
+            var NameString = role.title;
+            RoleArray.push(NameString)
+        });
+
+        inquirer.prompt({
+            type: "list",
+            message: "Please Select a Role to View the Utilized Budget By:",
+            name: "role",
+            choices: RoleArray
+        }).then(function(response) {
+            let role = response.role;
+            let index = RoleArray.indexOf(role)
+            let roleId = res[index].id;
+            let roleSalary = res[index].salary
+            connection.query("SELECT * FROM employee WHERE role_id=" + roleId, function(error, result) {
+                if (error) throw error;
+                var SumUtilizedBudget = roleSalary * result.length;
+                console.log("Current budget for " + role + " role is: " + USDformatter.format(SumUtilizedBudget))
+                Next()
+            })
+        });
+    })
 }
 
 const AddEmployee = () => {
