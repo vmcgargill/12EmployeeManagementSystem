@@ -1,9 +1,9 @@
 const fs = require("fs");
 const inquirer = require("inquirer");
 const path = require("path");
-const { timeStamp } = require("console");
 var mysql = require("mysql");
 
+// Creates connection to MySQL database
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -12,17 +12,20 @@ const connection = mysql.createConnection({
     database: "employee_db"
 });
 
+// Connects to MySQL database and initializes the start of the app
 connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
     Start();
 });
 
+// Starts the app with a welcome message and then initializes the main menu
 const Start = () => {
     console.log("Welcome to the Employee Management System");
     MainMenu();
 }
 
+// Displays the main menu with all of the options to view, add, update, and delete database information
 const MainMenu = () => {
     inquirer.prompt({
         type: "list",
@@ -72,6 +75,7 @@ const MainMenu = () => {
     })
 }
 
+// Next prompt that allows the user to either return to the main menu or exit the app
 const Next = () => {
     inquirer.prompt({
         type: "list",
@@ -92,11 +96,13 @@ const Next = () => {
     })
 }
 
+// Exit the app displays a Goodbye message and ends the connection with the database
 const Exit = () => {
     console.log("Goodbye");
     connection.end();
 }
 
+// Views a specific employee's details
 const ViewSpecificEmployee = () => {
     connection.query("SELECT * FROM employee", function(err, res) {
         if (err) throw err;
@@ -126,6 +132,7 @@ const ViewSpecificEmployee = () => {
     });
 }
 
+// Views all employees and details
 const ViewAllEmployees = () => {
     console.log("View All Employees:");
     connection.query("SELECT * FROM employee", function(err, res) {
@@ -135,6 +142,7 @@ const ViewAllEmployees = () => {
     });
 }
 
+// Views all departments and details
 const ViewAllDepartments = () => {
     console.log("View All Departments:");
     connection.query("SELECT * FROM department", function(err, res) {
@@ -144,6 +152,7 @@ const ViewAllDepartments = () => {
     });
 }
 
+// Views all roles and details
 const ViewAllRoles = () => {
     console.log("View All Roles:");
     connection.query("SELECT * FROM employee_role", function(err, res) {
@@ -153,6 +162,7 @@ const ViewAllRoles = () => {
     });
 }
 
+// Views all roles by a specific department
 const ViewRolesByDepartment = () => {
     console.log("View All Roles by Department");
     connection.query("SELECT * FROM department", function(err, res) {
@@ -182,6 +192,7 @@ const ViewRolesByDepartment = () => {
     });
 }
 
+// Views all employees by a specific role
 const ViewEmployeesByRole = () => {
     console.log("View All Employees by Roles");
     connection.query("SELECT * FROM employee_role", function(err, res) {
@@ -211,6 +222,7 @@ const ViewEmployeesByRole = () => {
     });
 }
 
+// Views all employees by a specific department
 const ViewEmployeesByDepartment = () => {
     console.log("View All Employees by Department");
     connection.query("SELECT * FROM department", function(err, res) {
@@ -240,12 +252,17 @@ const ViewEmployeesByDepartment = () => {
     });
 }
 
+// Views all employees by a specific manager
 const ViewEmployeesByManager = () => {
     console.log("View All Employees by Manager");
-    connection.query("SELECT * FROM department WHERE name='Management'", function(err, res) {
+    // To prevent future bugs, I made it so the ViewEmployeesByManager function checks which department rows are Management
+    // or Executive. This makes it so the id's used to find all managers is always correct.
+    connection.query("SELECT * FROM department WHERE name='Management' OR name='Executive'", function(err, res) {
         if (err) throw err;
-        let ManagementDepartmentId = res[0].id
-        connection.query("SELECT * FROM employee WHERE department_id=" + ManagementDepartmentId, function(error, result) {
+        let ExecutiveDepartmentId = res[0].id
+        let ManagementDepartmentId = res[1].id
+        connection.query("SELECT * FROM employee WHERE department_id=" + ExecutiveDepartmentId + 
+            " OR department_id=" + ManagementDepartmentId, function(error, result) {
             if (error) throw error;
             
             let ManagerArray = new Array();
@@ -308,4 +325,3 @@ const DeleteDepartment = () => {
 const DeleteRole = () => {
     console.log("Delete a Role");
 }
-
