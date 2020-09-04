@@ -262,7 +262,6 @@ const ViewEmployeesByManager = () => {
     const PromptMsg = "Please Select a Manager to View All Employees By:";
     const TableQuery = "ViewEmployeesByManager";
     ViewBy(SelectQuery, PromptMsg, TableQuery);
-
 }
 
 // Views the total utilized budget for each department by adding up employee salaries for that department
@@ -285,6 +284,62 @@ const ViewUBRole = () => {
 
 const AddEmployee = () => {
     console.log("Add an Employee");
+    connection.query("SELECT * FROM employee_role;", function(err, res) {
+        if (err) throw err;
+        let RoleArray = new Array();
+        res.forEach((role) => {RoleArray.push(role.title)});
+        inquirer.prompt([
+            {
+                type: "input",
+                message: "Please enter the first name of the employee:",
+                name: "first_name"
+            },
+            {
+                type: "input",
+                message: "Please enter the last name of the employee:",
+                name: "last_name"
+            },
+            {
+                type: "list",
+                message: "Please select a role for the employee:",
+                name: "role",
+                choices: RoleArray
+            }
+        ]).then(function(response) {
+            let first_name = response.first_name;
+            let last_name = response.last_name;
+            let role_id = res[RoleArray.indexOf(response.role)].id;
+            let department_id = res[RoleArray.indexOf(response.role)].department_id
+
+            connection.query(`SELECT employee.id, employee.first_name, employee.last_name FROM employee, department 
+            WHERE department.name='Management' AND department.id=employee.department_id 
+            OR department.name='Executive' AND department.id=employee.department_id;`, function(error, result){
+                if (error) throw error;
+                let ManagerArray = new Array();
+                result.forEach((employee) => {ManagerArray.push(employee.first_name + " " + employee.last_name)});
+                inquirer.prompt([
+                    {
+                        type: "list",
+                        message: "Please select a manager for the employee:",
+                        name: "manager",
+                        choices: ManagerArray
+                    }
+                ]).then(function(MGTresponse) {
+                    let manager_id = result[ManagerArray.indexOf(MGTresponse.manager)].id;
+                    let insertId
+
+                    connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id) 
+                    VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id}, ${department_id});`, 
+                    function(errormsg, resultmsg) {
+                        if (errormsg) throw errormsg;
+                        console.log(`Your new employee ${first_name} ${last_name} has been created!`);
+                        ViewAllEmployees();
+                    });
+                });
+            });
+        });
+
+    });
 }
 
 const AddDepartment = () => {
