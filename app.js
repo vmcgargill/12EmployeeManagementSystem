@@ -288,8 +288,6 @@ const AddEmployee = () => {
     console.log("Add an Employee");
     connection.query(RoleQueryAll, function(err, res) {
         if (err) throw err;
-        let RoleArray = new Array();
-        res.forEach((role) => {RoleArray.push(role.title)});
         inquirer.prompt([
             {
                 type: "input",
@@ -300,40 +298,71 @@ const AddEmployee = () => {
                 type: "input",
                 message: "Please enter the last name of the employee:",
                 name: "last_name"
-            },
-            {
-                type: "list",
-                message: "Please select a role for the employee:",
-                name: "role",
-                choices: RoleArray
             }
         ]).then(function(response) {
             let first_name = response.first_name;
             let last_name = response.last_name;
-            let role_id = res[RoleArray.indexOf(response.role)].id;
-            let department_id = res[RoleArray.indexOf(response.role)].department_id;
-            connection.query(ManagerTableQuery, function(error, result){
-                if (error) throw error;
-                let ManagerArray = new Array();
-                result.forEach((employee) => {ManagerArray.push(employee.first_name + " " + employee.last_name)});
-                inquirer.prompt([
-                    {
-                        type: "list",
-                        message: "Please select a manager for the employee:",
-                        name: "manager",
-                        choices: ManagerArray
-                    }
-                ]).then(function(MGTresponse) {
-                    let manager_id = result[ManagerArray.indexOf(MGTresponse.manager)].id;
-                    connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id) 
-                    VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id}, ${department_id});`, 
-                    function(errormsg, resultmsg) {
-                        if (errormsg) throw errormsg;
-                        console.log(`Your new employee ${first_name} ${last_name} has been created!`);
-                        let NewEmployee = EmployeeTableQuery + ` AND employee.id=${resultmsg.insertId};`;
-                        QueryTable(NewEmployee);
+            
+            connection.query(EmployeeQueryAll, function(emperr, empres) {
+                if (emperr) throw emperr;
+                let EmployeeArray = new Array();
+                empres.forEach((employee) => {EmployeeArray.push(employee.first_name + " " + employee.last_name)});
+                let CurrentEmployeeIndex = EmployeeArray.indexOf(first_name + " " + last_name);
+                if (CurrentEmployeeIndex !== -1) {
+                    inquirer.prompt([
+                        {
+                            type: "list",
+                            message: "Error: It looks like their is already an employee by the name of '" + first_name + 
+                            " " + last_name + "'. There cannot be duplicates. Please alter the name and try again.",
+                            name: "duplicate",
+                            choices: [
+                                "OK",
+                                "Cancel"
+                            ]
+                        }
+                    ]).then(function(errResponse) {
+                        let duplicate = errResponse.duplicate;
+                        if (duplicate === "OK") {
+                            AddEmployee();
+                        } else if (duplicate === "Cancel") {
+                            Next();
+                        }
                     });
-                });
+                } else {
+                    connection.query(ManagerTableQuery, function(error, result){
+                        if (error) throw error;
+                        let RoleArray = new Array();
+                        res.forEach((role) => {RoleArray.push(role.title)});
+                        let ManagerArray = new Array();
+                        result.forEach((employee) => {ManagerArray.push(employee.first_name + " " + employee.last_name)});
+                        inquirer.prompt([
+                            {
+                                type: "list",
+                                message: "Please select a role for the employee:",
+                                name: "role",
+                                choices: RoleArray
+                            },
+                            {
+                                type: "list",
+                                message: "Please select a manager for the employee:",
+                                name: "manager",
+                                choices: ManagerArray
+                            }
+                        ]).then(function(Newresponse) {
+                            let department_id = res[RoleArray.indexOf(Newresponse.role)].department_id;
+                            let role_id = res[RoleArray.indexOf(Newresponse.role)].id;
+                            let manager_id = result[ManagerArray.indexOf(Newresponse.manager)].id;
+                            connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id) 
+                            VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id}, ${department_id});`, 
+                            function(errormsg, resultmsg) {
+                                if (errormsg) throw errormsg;
+                                console.log(`Your new employee ${first_name} ${last_name} has been created!`);
+                                let NewEmployee = EmployeeTableQuery + ` AND employee.id=${resultmsg.insertId};`;
+                                QueryTable(NewEmployee);
+                            });
+                        });
+                    });
+                }
             });
         });
     });
@@ -360,7 +389,7 @@ const AddDepartment = () => {
                 inquirer.prompt([
                     {
                         type: "list",
-                        message: "It looks like the department '" + DepartmentName + 
+                        message: "Error: It looks like the department '" + DepartmentName + 
                         "' already exists. This cannot duplicate. Please try again with a unique name.",
                         name: "duplicate",
                         choices: [
@@ -408,7 +437,7 @@ const AddRole = () => {
                 inquirer.prompt([
                     {
                         type: "list",
-                        message: "It looks like the role '" + RoleName + 
+                        message: "Error: It looks like the role '" + RoleName + 
                         "' already exists. This cannot duplicate. Please try again with a unique name.",
                         name: "duplicate",
                         choices: [
