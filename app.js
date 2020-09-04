@@ -13,6 +13,12 @@ WHERE employee.manager_id=manager.id
 AND employee.department_id=department.id
 AND employee.role_id=employee_role.id`
 
+const RoleTableQuery = `SELECT employee_role.id, 
+employee_role.title, employee_role.salary, 
+department.name department_name
+FROM employee_role, department 
+WHERE employee_role.department_id=department.id`
+
 // Creates connection to MySQL database
 const connection = mysql.createConnection({
     host: "localhost",
@@ -215,11 +221,6 @@ const ViewAllDepartments = () => {
 
 // Views all roles and details
 const ViewAllRoles = () => {
-    const RoleTableQuery = `
-    SELECT employee_role.id, employee_role.title, employee_role.salary, 
-    department.name department_name
-    FROM employee_role, department 
-    WHERE employee_role.department_id=department.id`;
     console.log("View All Roles:");
     QueryTable(RoleTableQuery);
 }
@@ -343,7 +344,7 @@ const AddDepartment = () => {
     inquirer.prompt([
         {
             type: "input",
-            message: "Please enter the name of your new department:",
+            message: "Please enter the name of the department you would like to add:",
             name: "DepartmentName"
         }
     ]).then(function(response) {
@@ -359,7 +360,8 @@ const AddDepartment = () => {
                 inquirer.prompt([
                     {
                         type: "list",
-                        message: "It looks like the department " + DepartmentName + " already exists. This cannot duplicate. Please try again with a unique name.",
+                        message: "It looks like the department '" + DepartmentName + 
+                        "' already exists. This cannot duplicate. Please try again with a unique name.",
                         name: "duplicate",
                         choices: [
                             "OK",
@@ -387,7 +389,103 @@ const AddDepartment = () => {
 
 const AddRole = () => {
     console.log("Add a Role");
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "Please enter the name of your new role:",
+            name: "RoleName"
+        }
+    ]).then(function(response) {
+        let RoleName = response.RoleName;
+        connection.query("SELECT * FROM employee_role;", function(err, res) {
+            if (err) throw err;
+            let RoleArray = new Array();
+            res.forEach((role) => {RoleArray.push(role.title)});
+            let Role = RoleArray.indexOf(RoleName);
+            if (Role !== -1) {
+                const table = cTable.getTable(res[Role]);
+                console.log(table);
+                inquirer.prompt([
+                    {
+                        type: "list",
+                        message: "It looks like the role '" + RoleName + 
+                        "' already exists. This cannot duplicate. Please try again with a unique name.",
+                        name: "duplicate",
+                        choices: [
+                            "OK",
+                            "Cancel"
+                        ]
+                    }
+                ]).then(function(newResponse) {
+                    if (newResponse.duplicate === "OK") {
+                        AddRole();
+                    } else if (newResponse.duplicate === "Cancel") {
+                        Next();
+                    }
+                });
+            } else {
+                const EnterSalary = () => {
+                    inquirer.prompt([
+                        {
+                            type: "number",
+                            message: "Please enter a salary amount for this new role.:",
+                            name: "salary"
+                        }
+                    ]).then(function(salaryResponse) {
+
+                        let salary = salaryResponse.salary;
+                        if (salary === NaN) {
+                            inquirer.prompt([
+                                {
+                                    type: "list",
+                                    message: "It looks like '" + salary + 
+                                    "' is not an integer. The salary value must be an integer. Please try again.",
+                                    name: "duplicate",
+                                    choices: [
+                                        "OK",
+                                        "Cancel"
+                                    ]
+                                }
+                            ]).then(function(newResponse) {
+                                if (newResponse.duplicate === "OK") {
+                                    EnterSalary();
+                                } else if (newResponse.duplicate === "Cancel") {
+                                    Next();
+                                }
+                            });
+                        } else {
+                            connection.query("SELECT * FROM department;", function(error, result) {
+                                if (error) throw error;
+                                let DepartmentArray = new Array();
+                                result.forEach((department) => {DepartmentArray.push(department.name)});
+                                inquirer.prompt([
+                                    {
+                                        type: "list",
+                                        message: "Please assign a department for this role:",
+                                        name: "department",
+                                        choices: DepartmentArray
+                                    }
+                                ]).then(function(departmentResponse) {
+                                    let department = departmentResponse.department;
+                                    let department_id = result[DepartmentArray.indexOf(department)].id;
+                                    connection.query(`INSERT INTO employee_role (title, salary, department_id)
+                                    VALUES ('${RoleName}', ${salary}, ${department_id});`, function(errormsg, resultmsg) {
+                                        if (errormsg) throw errormsg;
+                                        console.log(`Your new role ${RoleName} has been created!`);
+                                        let NewRole = RoleTableQuery + ` AND employee_role.id=${resultmsg.insertId};`;
+                                        QueryTable(NewRole);
+                                    });
+                                });
+                            });
+                        }
+                    });
+                }
+                EnterSalary();
+            }
+        });
+    });
 }
+
 
 const UpdateEmployee = () => {
     console.log("Update an Employee");
