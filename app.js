@@ -308,8 +308,7 @@ const AddEmployee = () => {
             let first_name = response.first_name;
             let last_name = response.last_name;
             let role_id = res[RoleArray.indexOf(response.role)].id;
-            let department_id = res[RoleArray.indexOf(response.role)].department_id
-
+            let department_id = res[RoleArray.indexOf(response.role)].department_id;
             connection.query(`SELECT employee.id, employee.first_name, employee.last_name FROM employee, department 
             WHERE department.name='Management' AND department.id=employee.department_id 
             OR department.name='Executive' AND department.id=employee.department_id;`, function(error, result){
@@ -325,24 +324,65 @@ const AddEmployee = () => {
                     }
                 ]).then(function(MGTresponse) {
                     let manager_id = result[ManagerArray.indexOf(MGTresponse.manager)].id;
-
                     connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id) 
                     VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id}, ${department_id});`, 
                     function(errormsg, resultmsg) {
                         if (errormsg) throw errormsg;
                         console.log(`Your new employee ${first_name} ${last_name} has been created!`);
-                        let NewEmployee = EmployeeTableQuery + ` AND employee.id=${resultmsg.insertId};`
+                        let NewEmployee = EmployeeTableQuery + ` AND employee.id=${resultmsg.insertId};`;
                         QueryTable(NewEmployee);
                     });
                 });
             });
         });
-
     });
 }
 
 const AddDepartment = () => {
     console.log("Add a Department");
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "Please enter the name of your new department:",
+            name: "DepartmentName"
+        }
+    ]).then(function(response) {
+        let DepartmentName = response.DepartmentName;
+        connection.query("SELECT * FROM department;", function(err, res) {
+            if (err) throw err;
+            let DepartmentArray = new Array();
+            res.forEach((department) => {DepartmentArray.push(department.name)});
+            let Department = DepartmentArray.indexOf(DepartmentName);
+            if (Department !== -1) {
+                const table = cTable.getTable(res[Department]);
+                console.log(table);
+                inquirer.prompt([
+                    {
+                        type: "list",
+                        message: "It looks like the department " + DepartmentName + " already exists. This cannot duplicate. Please try again with a unique name.",
+                        name: "duplicate",
+                        choices: [
+                            "OK",
+                            "Cancel"
+                        ]
+                    }
+                ]).then(function(newResponse) {
+                    if (newResponse.duplicate === "OK") {
+                        AddDepartment();
+                    } else if (newResponse.duplicate === "Cancel") {
+                        Next();
+                    }
+                });
+            } else {
+                connection.query(`INSERT INTO department (name) VALUES ('${DepartmentName}')`, function(error, result) {
+                    if (error) throw error;
+                    console.log(`Your new department ${DepartmentName} has been created!`);
+                    let NewDepartment = `SELECT * FROM department WHERE department.id=${result.insertId};`;
+                    QueryTable(NewDepartment);
+                });
+            }
+        });
+    });
 }
 
 const AddRole = () => {
