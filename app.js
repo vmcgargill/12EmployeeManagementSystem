@@ -255,8 +255,6 @@ const ViewEmployeesByDepartment = () => {
 // Views all employees by a specific manager
 const ViewEmployeesByManager = () => {
     console.log("View All Employees by Manager");
-    // To prevent future bugs, I made it so the ViewEmployeesByManager function checks which employees currently
-    // have an ID that another employee in the table has assigned as a manager_id. That way we are always pulling all managers.
     const SelectQuery = `
     SELECT employee.id, employee.first_name, employee.last_name FROM employee, department 
     WHERE department.name='Management' AND department.id=employee.department_id 
