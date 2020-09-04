@@ -19,6 +19,18 @@ department.name department_name
 FROM employee_role, department 
 WHERE employee_role.department_id=department.id`
 
+const ManagerTableQuery = `
+SELECT employee.id, employee.first_name, employee.last_name FROM employee, department 
+WHERE department.name='Management' AND department.id=employee.department_id 
+OR department.name='Executive' AND department.id=employee.department_id`
+
+const DepartmetnQueryAll = `SELECT * FROM department`;
+
+const RoleQueryAll = `SELECT * FROM employee_role`;
+
+const EmployeeQueryAll = `SELECT * FROM employee`
+    
+
 // Creates connection to MySQL database
 const connection = mysql.createConnection({
     host: "localhost",
@@ -31,7 +43,6 @@ const connection = mysql.createConnection({
 // Connects to MySQL database and initializes the start of the app
 connection.connect(function(err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId);
     Start();
 });
 
@@ -52,10 +63,10 @@ const MainMenu = () => {
             "View All Employees",
             "View All Departments",
             "View All Roles",
-            "View All Roles by Department",
-            "View All Employees by Roles",
-            "View All Employees by Department",
-            "View All Employees by Manager",
+            "View Roles By Department",
+            "View Employees By Role",
+            "View Employees by Department",
+            "View Employees by Manager",
             "View Utilized Budget of a Department",
             "View Utilized Budget of a Role",
             "Add an Employee",
@@ -68,17 +79,16 @@ const MainMenu = () => {
             "Exit"
         ]
     }).then((response) => {
-        var start = response.start;
-
+        let start = response.start;
         if (start === "Exit") Exit(); 
         else if (start === "View a Specific Employee") ViewSpecificEmployee();
         else if (start === "View All Employees") ViewAllEmployees();
         else if (start === "View All Departments") ViewAllDepartments();
         else if (start === "View All Roles") ViewAllRoles();
-        else if (start === "View All Roles by Department") ViewRolesByDepartment();
-        else if (start === "View All Employees by Roles") ViewEmployeesByRole();
-        else if (start === "View All Employees by Department") ViewEmployeesByDepartment();
-        else if (start === "View All Employees by Manager") ViewEmployeesByManager();
+        else if (start === "View Roles By Department") ViewRolesByDepartment();
+        else if (start === "View Employees By Role") ViewEmployeesByRole();
+        else if (start === "View Employees by Department") ViewEmployeesByDepartment();
+        else if (start === "View Employees by Manager") ViewEmployeesByManager();
         else if (start === "View Utilized Budget of a Department") ViewUBDepartment();
         else if (start === "View Utilized Budget of a Role") ViewUBRole();
         else if (start === "Add an Employee") AddEmployee();
@@ -102,8 +112,7 @@ const Next = () => {
             "Exit"
         ]
     }).then((response) => {
-        var next = response.next;
-
+        let next = response.next;
         if (next === "Return to Main Menu") {
             MainMenu();
         } else if (next === "Exit") {
@@ -133,7 +142,6 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
     connection.query(SelectQuery, function(err, res) {
         if (err) throw err;
         let ChoicesArray = new Array();
-
         if (TableQuery === "ViewRolesByDepartment" || TableQuery === "ViewEmployeesByDepartment" || TableQuery === "ViewUBDepartment") {
             res.forEach((department) => {ChoicesArray.push(department.name)});
         } else if (TableQuery === "ViewEmployeesByRole" || TableQuery === "ViewUBRole") {
@@ -141,7 +149,6 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
         } else if (TableQuery === "ViewEmployeesByManager" || TableQuery === "ViewSpecificEmployee") {
             res.forEach((employee) => {ChoicesArray.push(employee.first_name + " " + employee.last_name)});
         }
-
         inquirer.prompt({
             type: "list",
             message: PromptMsg,
@@ -158,7 +165,7 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
                     QueryTable(SelectionQuery);
                     break;
                 case "ViewRolesByDepartment":
-                    SelectionQuery = `SELECT * FROM employee_role WHERE department_id=${SelectionId}`;
+                    SelectionQuery = RoleQueryAll + ` WHERE department_id=${SelectionId}`;
                     QueryTable(SelectionQuery);
                     break;
                 case "ViewEmployeesByRole":
@@ -175,8 +182,7 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
                     break;
                 case "ViewUBDepartment":
                     connection.query(`SELECT employee_role.salary FROM employee, employee_role 
-                    WHERE employee.role_id=employee_role.id 
-                    AND employee.department_id=` + SelectionId, function(error, result) {
+                    WHERE employee.role_id=employee_role.id AND employee.department_id=` + SelectionId, function(error, result) {
                         if (error) throw error;
                         var SumUtilizedBudget = 0;
                         result.forEach((role) => SumUtilizedBudget += role.salary)
@@ -185,7 +191,7 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
                     });
                     break;
                 case "ViewUBRole":
-                    connection.query("SELECT * FROM employee WHERE role_id=" + SelectionId, function(error, result) {
+                    connection.query(EmployeeQueryAll + ` WHERE role_id=` + SelectionId, function(error, result) {
                         if (error) throw error;
                         let roleSalary = res[index].salary;
                         var SumUtilizedBudget = roleSalary * result.length;
@@ -201,7 +207,7 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
 // Views a specific employee's details
 const ViewSpecificEmployee = () => {
     console.log("View A Specific Employee");
-    const SelectQuery = "SELECT * FROM employee";
+    const SelectQuery = EmployeeQueryAll;
     const PromptMsg = "Please Select an Employee to View:";
     const TableQuery = "ViewSpecificEmployee";
     ViewBy(SelectQuery, PromptMsg, TableQuery);
@@ -216,7 +222,7 @@ const ViewAllEmployees = () => {
 // Views all departments and details
 const ViewAllDepartments = () => {
     console.log("View All Departments:");
-    QueryTable("SELECT * FROM department");
+    QueryTable(DepartmetnQueryAll);
 }
 
 // Views all roles and details
@@ -228,7 +234,7 @@ const ViewAllRoles = () => {
 // Views all roles by a specific department
 const ViewRolesByDepartment = () => {
     console.log("View All Roles by Department");
-    const SelectQuery = "SELECT * FROM department";
+    const SelectQuery = DepartmetnQueryAll;
     const PromptMsg = "Please Select a Department to View All Roles By:";
     const TableQuery = "ViewRolesByDepartment";
     ViewBy(SelectQuery, PromptMsg, TableQuery);
@@ -237,7 +243,7 @@ const ViewRolesByDepartment = () => {
 // Views all employees by a specific role
 const ViewEmployeesByRole = () => {
     console.log("View All Employees by Roles");
-    const SelectQuery = "SELECT * FROM employee_role";
+    const SelectQuery = RoleQueryAll;
     const PromptMsg = "Please Select a Role to View All Employees By:";
     const TableQuery = "ViewEmployeesByRole";
     ViewBy(SelectQuery, PromptMsg, TableQuery);
@@ -246,7 +252,7 @@ const ViewEmployeesByRole = () => {
 // Views all employees by a specific department
 const ViewEmployeesByDepartment = () => {
     console.log("View All Employees by Department");
-    const SelectQuery = "SELECT * FROM department";
+    const SelectQuery = DepartmetnQueryAll;
     const PromptMsg = "Please Select a Department to View All Employees By:";
     const TableQuery = "ViewEmployeesByDepartment";
     ViewBy(SelectQuery, PromptMsg, TableQuery);
@@ -255,19 +261,15 @@ const ViewEmployeesByDepartment = () => {
 // Views all employees by a specific manager
 const ViewEmployeesByManager = () => {
     console.log("View All Employees by Manager");
-    const SelectQuery = `
-    SELECT employee.id, employee.first_name, employee.last_name FROM employee, department 
-    WHERE department.name='Management' AND department.id=employee.department_id 
-    OR department.name='Executive' AND department.id=employee.department_id;`;
     const PromptMsg = "Please Select a Manager to View All Employees By:";
     const TableQuery = "ViewEmployeesByManager";
-    ViewBy(SelectQuery, PromptMsg, TableQuery);
+    ViewBy(ManagerTableQuery, PromptMsg, TableQuery);
 }
 
 // Views the total utilized budget for each department by adding up employee salaries for that department
 const ViewUBDepartment = () => {
     console.log("View Utilized Budget of a Department");
-    const SelectQuery = "SELECT * FROM department";
+    const SelectQuery = DepartmetnQueryAll;
     const PromptMsg = "Please Select a Department to View the Utilized Budget By:";
     const TableQuery = "ViewUBDepartment";
     ViewBy(SelectQuery, PromptMsg, TableQuery);
@@ -276,7 +278,7 @@ const ViewUBDepartment = () => {
 // Views the total utilized budget for each role by adding up employee salaries for that role
 const ViewUBRole = () => {
     console.log("View Utilized Budget of a Role");
-    const SelectQuery = "SELECT * FROM employee_role";
+    const SelectQuery = RoleQueryAll;
     const PromptMsg = "Please Select a Role to View the Utilized Budget By:";
     const TableQuery = "ViewUBRole";
     ViewBy(SelectQuery, PromptMsg, TableQuery);
@@ -284,7 +286,7 @@ const ViewUBRole = () => {
 
 const AddEmployee = () => {
     console.log("Add an Employee");
-    connection.query("SELECT * FROM employee_role;", function(err, res) {
+    connection.query(RoleQueryAll, function(err, res) {
         if (err) throw err;
         let RoleArray = new Array();
         res.forEach((role) => {RoleArray.push(role.title)});
@@ -310,9 +312,7 @@ const AddEmployee = () => {
             let last_name = response.last_name;
             let role_id = res[RoleArray.indexOf(response.role)].id;
             let department_id = res[RoleArray.indexOf(response.role)].department_id;
-            connection.query(`SELECT employee.id, employee.first_name, employee.last_name FROM employee, department 
-            WHERE department.name='Management' AND department.id=employee.department_id 
-            OR department.name='Executive' AND department.id=employee.department_id;`, function(error, result){
+            connection.query(ManagerTableQuery, function(error, result){
                 if (error) throw error;
                 let ManagerArray = new Array();
                 result.forEach((employee) => {ManagerArray.push(employee.first_name + " " + employee.last_name)});
@@ -349,7 +349,7 @@ const AddDepartment = () => {
         }
     ]).then(function(response) {
         let DepartmentName = response.DepartmentName;
-        connection.query("SELECT * FROM department;", function(err, res) {
+        connection.query(DepartmetnQueryAll, function(err, res) {
             if (err) throw err;
             let DepartmentArray = new Array();
             res.forEach((department) => {DepartmentArray.push(department.name)});
@@ -379,7 +379,7 @@ const AddDepartment = () => {
                 connection.query(`INSERT INTO department (name) VALUES ('${DepartmentName}')`, function(error, result) {
                     if (error) throw error;
                     console.log(`Your new department ${DepartmentName} has been created!`);
-                    let NewDepartment = `SELECT * FROM department WHERE department.id=${result.insertId};`;
+                    let NewDepartment = DepartmetnQueryAll + ` WHERE department.id=${result.insertId};`;
                     QueryTable(NewDepartment);
                 });
             }
@@ -397,7 +397,7 @@ const AddRole = () => {
         }
     ]).then(function(response) {
         let RoleName = response.RoleName;
-        connection.query("SELECT * FROM employee_role;", function(err, res) {
+        connection.query(RoleQueryAll, function(err, res) {
             if (err) throw err;
             let RoleArray = new Array();
             res.forEach((role) => {RoleArray.push(role.title)});
@@ -454,7 +454,7 @@ const AddRole = () => {
                                 }
                             });
                         } else {
-                            connection.query("SELECT * FROM department;", function(error, result) {
+                            connection.query(DepartmetnQueryAll, function(error, result) {
                                 if (error) throw error;
                                 let DepartmentArray = new Array();
                                 result.forEach((department) => {DepartmentArray.push(department.name)});
