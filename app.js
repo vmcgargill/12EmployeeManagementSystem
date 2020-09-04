@@ -201,7 +201,6 @@ const ViewSpecificEmployee = () => {
     ViewBy(SelectQuery, PromptMsg, TableQuery);
 }
 
-
 // Views all employees and details
 const ViewAllEmployees = () => {
     console.log("View All Employees:");
@@ -326,14 +325,14 @@ const AddEmployee = () => {
                     }
                 ]).then(function(MGTresponse) {
                     let manager_id = result[ManagerArray.indexOf(MGTresponse.manager)].id;
-                    let insertId
 
                     connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id) 
                     VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id}, ${department_id});`, 
                     function(errormsg, resultmsg) {
                         if (errormsg) throw errormsg;
                         console.log(`Your new employee ${first_name} ${last_name} has been created!`);
-                        ViewAllEmployees();
+                        let NewEmployee = EmployeeTableQuery + ` AND employee.id=${resultmsg.insertId};`
+                        QueryTable(NewEmployee);
                     });
                 });
             });
