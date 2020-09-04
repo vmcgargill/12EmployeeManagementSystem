@@ -80,8 +80,8 @@ VALUES
 -- Managers
 ("King", "Midas", 7, 2, 2), -- 7
 ("Julius", "Caesar", 8, 3, 2), -- 8
-("Genghis", "Khan", 10, 4, 2), -- 9
-("Queen", "Victoria", 12, 5, 2), -- 10
+("Genghis", "Khan", 9, 4, 2), -- 9
+("Queen", "Victoria", 10, 5, 2), -- 10
 ("Alexander", "III Macedonia", 11, 6, 2), -- 11
 ("Queen", "Elizabeth", 12, 6, 2), -- 12
 -- Sales Represenatives
