@@ -29,7 +29,6 @@ const DepartmetnQueryAll = `SELECT * FROM department`;
 const RoleQueryAll = `SELECT * FROM employee_role`;
 
 const EmployeeQueryAll = `SELECT * FROM employee`
-    
 
 // Creates connection to MySQL database
 const connection = mysql.createConnection({
@@ -284,57 +283,57 @@ const ViewUBRole = () => {
     ViewBy(SelectQuery, PromptMsg, TableQuery);
 }
 
+// Creates a new employee and adds it to the database
 const AddEmployee = () => {
     console.log("Add an Employee");
-    connection.query(RoleQueryAll, function(err, res) {
-        if (err) throw err;
-        inquirer.prompt([
-            {
-                type: "input",
-                message: "Please enter the first name of the employee:",
-                name: "first_name"
-            },
-            {
-                type: "input",
-                message: "Please enter the last name of the employee:",
-                name: "last_name"
-            }
-        ]).then(function(response) {
-            let first_name = response.first_name;
-            let last_name = response.last_name;
-            
-            connection.query(EmployeeQueryAll, function(emperr, empres) {
-                if (emperr) throw emperr;
-                let EmployeeArray = new Array();
-                empres.forEach((employee) => {EmployeeArray.push(employee.first_name + " " + employee.last_name)});
-                let CurrentEmployeeIndex = EmployeeArray.indexOf(first_name + " " + last_name);
-                if (CurrentEmployeeIndex !== -1) {
-                    inquirer.prompt([
-                        {
-                            type: "list",
-                            message: "Error: It looks like their is already an employee by the name of '" + first_name + 
-                            " " + last_name + "'. There cannot be duplicates. Please alter the name and try again.",
-                            name: "duplicate",
-                            choices: [
-                                "OK",
-                                "Cancel"
-                            ]
-                        }
-                    ]).then(function(errResponse) {
-                        let duplicate = errResponse.duplicate;
-                        if (duplicate === "OK") {
-                            AddEmployee();
-                        } else if (duplicate === "Cancel") {
-                            Next();
-                        }
-                    });
-                } else {
-                    connection.query(ManagerTableQuery, function(error, result){
-                        if (error) throw error;
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "Please enter the first name of the employee:",
+            name: "first_name"
+        },
+        {
+            type: "input",
+            message: "Please enter the last name of the employee:",
+            name: "last_name"
+        }
+    ]).then(function(response) {
+        let first_name = response.first_name;
+        let last_name = response.last_name;
+        connection.query(EmployeeQueryAll, function(emperr, empres) {
+            if (emperr) throw emperr;
+            let EmployeeArray = new Array();
+            empres.forEach((employee) => {EmployeeArray.push(employee.first_name + " " + employee.last_name)});
+            let CurrentEmployeeIndex = EmployeeArray.indexOf(first_name + " " + last_name);
+            if (CurrentEmployeeIndex !== -1) {
+                inquirer.prompt([
+                    {
+                        type: "list",
+                        message: "Error: It looks like their is already an employee by the name of '" + first_name + 
+                        " " + last_name + "'. There cannot be duplicates. Please alter the name and try again.",
+                        name: "duplicate",
+                        choices: [
+                            "OK",
+                            "Cancel"
+                        ]
+                    }
+                ]).then(function(errResponse) {
+                    let duplicate = errResponse.duplicate;
+                    if (duplicate === "OK") {
+                        AddEmployee();
+                    } else if (duplicate === "Cancel") {
+                        Next();
+                    }
+                });
+            } else {
+                connection.query(ManagerTableQuery, function(error, result) {
+                    if (error) throw error;
+                    let ManagerArray = new Array();
+                    result.forEach((employee) => {ManagerArray.push(employee.first_name + " " + employee.last_name)});
+                    connection.query(RoleQueryAll, function(err, res) {
+                        if (err) throw err;
                         let RoleArray = new Array();
                         res.forEach((role) => {RoleArray.push(role.title)});
-                        let ManagerArray = new Array();
-                        result.forEach((employee) => {ManagerArray.push(employee.first_name + " " + employee.last_name)});
                         inquirer.prompt([
                             {
                                 type: "list",
@@ -362,12 +361,13 @@ const AddEmployee = () => {
                             });
                         });
                     });
-                }
-            });
+                });
+            }
         });
     });
 }
 
+// Creates a new department and adds it to the database
 const AddDepartment = () => {
     console.log("Add a Department");
     inquirer.prompt([
@@ -416,6 +416,7 @@ const AddDepartment = () => {
     });
 }
 
+// Creates a new role and adds it to the database
 const AddRole = () => {
     console.log("Add a Role");
     inquirer.prompt([
@@ -457,11 +458,10 @@ const AddRole = () => {
                     inquirer.prompt([
                         {
                             type: "number",
-                            message: "Please enter a salary amount for this new role.:",
+                            message: "Please enter a salary amount for this new role:",
                             name: "salary"
                         }
                     ]).then(function(salaryResponse) {
-
                         let salary = salaryResponse.salary;
                         if (salary === NaN) {
                             inquirer.prompt([
@@ -514,7 +514,6 @@ const AddRole = () => {
         });
     });
 }
-
 
 const UpdateEmployee = () => {
     console.log("Update an Employee");
