@@ -11,24 +11,24 @@ CONCAT(manager.first_name , ' ' , manager.last_name) AS manager_name
 FROM employee, employee manager, department, employee_role 
 WHERE employee.manager_id=manager.id
 AND employee.role_id=employee_role.id
-AND employee_role.department_id=department.id`
+AND employee_role.department_id=department.id`;
 
 const RoleTableQuery = `SELECT employee_role.id, 
 employee_role.title, employee_role.salary, 
 department.name department_name
 FROM employee_role, department 
-WHERE employee_role.department_id=department.id`
+WHERE employee_role.department_id=department.id`;
 
 const ManagerTableQuery = `
 SELECT employee.id, employee.first_name, employee.last_name FROM employee, employee_role, department 
 WHERE department.name='Management' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id 
-OR department.name='Executive' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id`
+OR department.name='Executive' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id`;
 
 const DepartmetnQueryAll = `SELECT * FROM department`;
 
 const RoleQueryAll = `SELECT * FROM employee_role`;
 
-const EmployeeQueryAll = `SELECT * FROM employee`
+const EmployeeQueryAll = `SELECT * FROM employee`;
 
 // Creates connection to MySQL database
 const connection = mysql.createConnection({
@@ -94,6 +94,8 @@ const MainMenu = () => {
         else if (start === "Add a Department") AddDepartment();
         else if (start === "Add a Role") AddRole();
         else if (start === "Update an Employee") UpdateEmployee();
+        else if (start === "Update a Department") UpdateDepartment();
+        else if (start === "Update a Role") UpdateRole();
         else if (start === "Delete an Employee") DeleteEmployee();
         else if (start === "Delete a Department") DeleteDepartment();
         else if (start === "Delete a Role") DeleteRole();
@@ -517,6 +519,14 @@ const AddRole = () => {
 
 const UpdateEmployee = () => {
     console.log("Update an Employee");
+}
+
+const UpdateDepartment = () => {
+    console.log("Update a Department");
+}
+
+const UpdateRole = () => {
+    console.log("Update a Role");
 }
 
 const DeleteEmployee = () => {
