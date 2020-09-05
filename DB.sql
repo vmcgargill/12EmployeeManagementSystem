@@ -9,8 +9,7 @@ CREATE TABLE employee (
   first_name VARCHAR(30) NOT NULL,
   last_name VARCHAR(30) NOT NULL,
   role_id int NOT NULL,
-  manager_id int NOT NULL,
-  department_id int NOT NULL
+  manager_id int NOT NULL
 );
 
 -- Create Employee Role Table 
@@ -68,64 +67,64 @@ VALUES ("Chief Executive Official", 1000000.00, 1),
 ("Finance Intern", 20000.00, 7);
 
 -- Insert Employees Values
-INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id)
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES 
 -- Executives
-("Bill", "Gates", 1, 1, 1), -- 1
-("Steve", "Jobs", 2, 1, 1), -- 2
-("Mark", "Zuckerberg", 3, 1, 1), -- 3
-("Elon", "Musk", 4, 1, 1), -- 4
-("Jeff", "Bezos", 5, 1, 1), -- 5
-("Warren", "Buffet", 6, 1, 1), -- 6
+("Bill", "Gates", 1, 1), -- 1
+("Steve", "Jobs", 2, 1), -- 2
+("Mark", "Zuckerberg", 3, 1), -- 3
+("Elon", "Musk", 4, 1), -- 4
+("Jeff", "Bezos", 5, 1), -- 5
+("Warren", "Buffet", 6, 1), -- 6
 -- Managers
-("King", "Midas", 7, 2, 2), -- 7
-("Julius", "Caesar", 8, 3, 2), -- 8
-("Genghis", "Khan", 9, 4, 2), -- 9
-("Queen", "Victoria", 10, 5, 2), -- 10
-("Alexander", "III Macedonia", 11, 6, 2), -- 11
-("Queen", "Elizabeth", 12, 6, 2), -- 12
+("King", "Midas", 7, 2), -- 7
+("Julius", "Caesar", 8, 3), -- 8
+("Genghis", "Khan", 9, 4), -- 9
+("Queen", "Victoria", 10, 5), -- 10
+("Alexander", "III Macedonia", 11, 6), -- 11
+("Queen", "Elizabeth", 12, 6), -- 12
 -- Sales Represenatives
-("Barrack", "Obama", 13, 7, 3), 
-("Donald", "Trump", 13, 7, 3),
-("Joe", "Biden", 13, 7, 3),
-("Hilary", "Clinton", 13, 7, 3),
+("Barrack", "Obama", 13, 7), 
+("Donald", "Trump", 13, 7),
+("Joe", "Biden", 13, 7),
+("Hilary", "Clinton", 13, 7),
 -- Marketing Interns
-("Mike", "Pence", 14, 7, 3),
-("Al", "Gore", 14, 7, 3),
-("Kamala", "Harris", 14, 7, 3),
+("Mike", "Pence", 14, 7),
+("Al", "Gore", 14, 7),
+("Kamala", "Harris", 14, 7),
 -- Production Associates
-("George", "Washington", 15, 8, 4),
-("Abraham", "Lincoln", 15, 8, 4),
-("Franklin", "Roosevelt", 15, 8, 4),
+("George", "Washington", 15, 8),
+("Abraham", "Lincoln", 15, 8),
+("Franklin", "Roosevelt", 15, 8),
 -- Customer Service Represenatives
-("Theodore", "Roosevelt", 16, 8, 4),
-("Thomas", "Jefferson", 16, 8, 4),
+("Theodore", "Roosevelt", 16, 8),
+("Thomas", "Jefferson", 16, 8),
 -- Order Specialist
-("Benjamin", "Franklin", 17, 8, 4),
+("Benjamin", "Franklin", 17, 8),
 -- Software Developer
-("Thomas", "Edison", 18, 9, 5),
-("Nikola", "Tesla", 18, 9, 5),
+("Thomas", "Edison", 18, 9),
+("Nikola", "Tesla", 18, 9),
 -- Desktop Support Specialist
-("Isaac", "Newton", 19, 9, 5),
-("Albert", "Einstein", 19, 9, 5),
-("Johann", "Goethe", 19, 9, 5),
+("Isaac", "Newton", 19, 9),
+("Albert", "Einstein", 19, 9),
+("Johann", "Goethe", 19, 9),
 -- Human Resource Coordinator
-("Elvis", "Presley", 20, 10, 6),
-("Johnny", "Cash", 20, 10, 6),
+("Elvis", "Presley", 20, 10),
+("Johnny", "Cash", 20, 10),
 -- Human Resource Assistant
-("Michael", "Jackson", 21, 10, 6),
-("Marshal", "Mathers", 21, 10, 6),
+("Michael", "Jackson", 21, 10),
+("Marshal", "Mathers", 21, 10),
 -- Accountant
-("John", "Lennon", 22, 11, 7),
-("Paul", "McCartney", 22, 11, 7),
+("John", "Lennon", 22, 11),
+("Paul", "McCartney", 22, 11),
 -- Bookkeeper
-("George", "Harrison", 23, 11, 7),
-("Ringo", "Starr", 23, 11, 7),
+("George", "Harrison", 23, 11),
+("Ringo", "Starr", 23, 11),
 -- Financial Analyst
-("Vlad", "Dracula", 24, 12, 7),
-("Elizabeth", "Báthory", 24, 12, 7),
+("Vlad", "Dracula", 24, 12),
+("Elizabeth", "Báthory", 24, 12),
 -- Finance Intern
-("Van", "Helsing", 25, 12, 7);
+("Van", "Helsing", 25, 12);
 
 -- To see data
 -- SELECT * FROM department;

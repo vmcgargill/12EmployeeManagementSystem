@@ -10,8 +10,8 @@ employee_role.title title, employee_role.salary, department.name department_name
 CONCAT(manager.first_name , ' ' , manager.last_name) AS manager_name 
 FROM employee, employee manager, department, employee_role 
 WHERE employee.manager_id=manager.id
-AND employee.department_id=department.id
-AND employee.role_id=employee_role.id`
+AND employee.role_id=employee_role.id
+AND employee_role.department_id=department.id`
 
 const RoleTableQuery = `SELECT employee_role.id, 
 employee_role.title, employee_role.salary, 
@@ -20,9 +20,9 @@ FROM employee_role, department
 WHERE employee_role.department_id=department.id`
 
 const ManagerTableQuery = `
-SELECT employee.id, employee.first_name, employee.last_name FROM employee, department 
-WHERE department.name='Management' AND department.id=employee.department_id 
-OR department.name='Executive' AND department.id=employee.department_id`
+SELECT employee.id, employee.first_name, employee.last_name FROM employee, employee_role, department 
+WHERE department.name='Management' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id 
+OR department.name='Executive' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id`
 
 const DepartmetnQueryAll = `SELECT * FROM department`;
 
@@ -172,7 +172,7 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
                     QueryTable(SelectionQuery);
                     break;
                 case "ViewEmployeesByDepartment":
-                    SelectionQuery += ` AND employee.department_id=${SelectionId};`;
+                    SelectionQuery += ` AND employee_role.department_id=${SelectionId};`;
                     QueryTable(SelectionQuery);
                     break;
                 case "ViewEmployeesByManager":
@@ -180,8 +180,9 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
                     QueryTable(SelectionQuery);
                     break;
                 case "ViewUBDepartment":
-                    connection.query(`SELECT employee_role.salary FROM employee, employee_role 
-                    WHERE employee.role_id=employee_role.id AND employee.department_id=` + SelectionId, function(error, result) {
+                    connection.query(`SELECT employee_role.salary FROM employee, employee_role, department 
+                    WHERE employee.role_id=employee_role.id AND employee_role.department_id=department.id 
+                    AND employee_role.department_id=` + SelectionId, function(error, result) {
                         if (error) throw error;
                         var SumUtilizedBudget = 0;
                         result.forEach((role) => SumUtilizedBudget += role.salary)
@@ -348,11 +349,10 @@ const AddEmployee = () => {
                                 choices: ManagerArray
                             }
                         ]).then(function(Newresponse) {
-                            let department_id = res[RoleArray.indexOf(Newresponse.role)].department_id;
                             let role_id = res[RoleArray.indexOf(Newresponse.role)].id;
                             let manager_id = result[ManagerArray.indexOf(Newresponse.manager)].id;
-                            connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id) 
-                            VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id}, ${department_id});`, 
+                            connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
+                            VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id});`, 
                             function(errormsg, resultmsg) {
                                 if (errormsg) throw errormsg;
                                 console.log(`Your new employee ${first_name} ${last_name} has been created!`);
