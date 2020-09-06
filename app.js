@@ -550,36 +550,33 @@ const UpdateEmployee = () => {
             let employee = response.employee;
             let index = EmployeeArray.indexOf(employee);
             let employe_id = res[index].id;
+            inquirer.prompt(
+                {
+                    type: "list",
+                    message: "Please Select an Option to Update the Employee '" + employee + "' on",
+                    name: "UpdateEmployee",
+                    choices: [
+                        "First Name",
+                        "Last Name",
+                        "Role/Title",
+                        "Manager"
+                    ]
+                }
+            ).then(function(UpdateResponse) {
+                let update = UpdateResponse.UpdateEmployee;
 
-            // Update function that passes in an employee's ID.
-            const Update = (employe_id) => {
-                inquirer.prompt(
-                    {
-                        type: "list",
-                        message: "Please Select an Option to Update the Employee '" + employee + "' on",
-                        name: "UpdateEmployee",
-                        choices: [
-                            "First Name",
-                            "Last Name",
-                            "Role/Title",
-                            "Manager"
-                        ]
-                    }
-                ).then(function(UpdateResponse) {
-                    let update = UpdateResponse.UpdateEmployee;
-                    let Change;
-                    let ColumnUpdate;
+                // Query Update function that takes in the requested changes and submits them to the database.
+                const QueryUpdate = (ColumnUpdate, ValueUpdate, employe_id) => {
+                    connection.query(`UPDATE employee SET employee.${ColumnUpdate}=` + ValueUpdate + 
+                    ` WHERE employee.id=${employe_id};`, function(error) {
+                        if (error) throw error;
+                        console.log("Employee has been updated!");
+                        QueryTable(EmployeeTableQuery + ` AND employee.id=` + employe_id);
+                    });
+                }
 
-                    // Query Update function that tkaes in the requested changes and submits them to the database.
-                    const QueryUpdate = (ColumnUpdate, Change) => {
-                        connection.query(`UPDATE employee SET employee.${ColumnUpdate}=` + Change + 
-                        ` WHERE employee.id=${employe_id};`, function(error) {
-                            if (error) throw error;
-                            console.log("Employee has been updated!");
-                            QueryTable(EmployeeTableQuery + ` AND employee.id=` + employe_id);
-                        });
-                    }
-
+                // Update function that passes in an employee's ID.
+                const Update = (employe_id) => {
                     // If statments that determines what the user is going to update and then passes it through the QueryUpdate() function.
                     if (update === "First Name" || update === "Last Name") {
                         inquirer.prompt(
@@ -589,17 +586,47 @@ const UpdateEmployee = () => {
                                 name: "name"
                             }
                         ).then(function(nameResponse) {
-                            Change = `'${nameResponse.name}'`;
+                            let ValueUpdate = `'${nameResponse.name}'`;
+                            let ColumnUpdate;
+                            let NewName;
                             if (update === "First Name") {
                                 ColumnUpdate = `first_name`;
-                                QueryUpdate(ColumnUpdate, Change);
+                                let last_name = res[index].last_name;
+                                NewName = nameResponse.name + " " + last_name;
                             } else if (update === "Last Name") {
                                 ColumnUpdate = `last_name`;
-                                QueryUpdate(ColumnUpdate, Change);
+                                let first_name = res[index].first_name;
+                                NewName =  first_name + " " + nameResponse.name;
+                            }
+
+                            let CheckNameIndex = EmployeeArray.indexOf(NewName);
+
+                            if (CheckNameIndex !== -1) {
+                                inquirer.prompt(
+                                    {
+                                        type: "list",
+                                        message: "Error: It looks like their is already an employee by the name of '" + NewName + 
+                                       "'. There cannot be duplicates. Please alter the name and try again.",
+                                        name: "duplicate",
+                                        choices: [
+                                            "OK",
+                                            "Cancel"
+                                        ]
+                                    }
+                                ).then(function(duplicateResponse) {
+                                    let duplicate = duplicateResponse.duplicate;
+                                    if (duplicate === "OK") {
+                                        Update(employe_id);
+                                    } else if (duplicate === "Cancel") {
+                                        Next();
+                                    }
+                                });
+                            } else {
+                                QueryUpdate(ColumnUpdate, ValueUpdate, employe_id);
                             }
                         });
                     } else if (update === "Role/Title") {
-                        ColumnUpdate = `role_id`
+                        let ColumnUpdate = `role_id`
                         connection.query(RoleQueryAll, function(errRole, resRole) {
                             let RoleArray = new Array();
                             resRole.forEach((role) => {RoleArray.push(role.title)});
@@ -611,28 +638,29 @@ const UpdateEmployee = () => {
                                 choices: RoleArray
                             }).then(function(roleResponse) {
                                 let NewRole = roleResponse.role;
-                                Change = resRole[RoleArray.indexOf(NewRole)].id
-                                QueryUpdate(ColumnUpdate, Change);
+                                let ValueUpdate = resRole[RoleArray.indexOf(NewRole)].id
+                                QueryUpdate(ColumnUpdate, ValueUpdate, employe_id);
                             })
                         });
                     // Lets the user update their manager to any employee in the database. 
                     // This is intentional incase the employee's manager is not in the management/executive department.
                     // Or if the emplyee's manager is assigned to themselves like the defult CEO of this company. 
                     } else if (update === "Manager") {
-                        ColumnUpdate = `manager_id`;
+                        let ColumnUpdate = `manager_id`;
                         inquirer.prompt({
                             type: "list",
                             message: "Please Select a New Manager:",
                             name: "manager",
                             choices: EmployeeArray
                         }).then(function(managerResponse) {
-                            Change = res[EmployeeArray.indexOf(managerResponse.manager)].id
-                            QueryUpdate(ColumnUpdate, Change);
+                            let ValueUpdate = res[EmployeeArray.indexOf(managerResponse.manager)].id
+                            QueryUpdate(ColumnUpdate, ValueUpdate, employe_id);
                         });
                     }
-                });
-            }
-            Update(employe_id);
+                }
+                Update(employe_id);
+            });
+
         });
     });
 }
