@@ -660,30 +660,52 @@ const DeleteEmployee = () => {
             let employee = response.employee;
             let index = EmployeeArray.indexOf(employee);
             let employe_id = res[index].id;
-            connection.query(`SELECT employee.id, employee.manager_id FROM employee WHERE employee.manager_id=` + 
-            employe_id, function(error, result){
+            connection.query(`SELECT employee.id, CONCAT(employee.first_name , ' ' , employee.last_name) AS name,
+            CONCAT(manager.first_name , ' ' , manager.last_name) AS manager_name FROM employee, employee manager
+            WHERE employee.manager_id=manager.id AND employee.manager_id=` + employe_id, function(error, result){
                 if (error) throw error;
-                console.log(result)
                 if (result.length > 0) {
+                    const table = cTable.getTable(result)
+                    console.log(table);
                     inquirer.prompt(
                         {
                             type: "list",
                             message: "It looks like the employee '" + employee + 
-                            "' is a manager for 1 or more person. You will have to reassign ",
+                            "' is a manager for 1 or more person. You will have to reassign managers for each employee first before deleting.",
                             name: "ReassignManager",
                             choices: [
-                                "OK, lets reassign the manager",
-                                "Cancel"
+                                "OK"
                             ]
                         }
-                    )
+                    ).then(function(){
+                        Next();
+                    })
                 } else {
-                    console.log("Not a manager!")
-                    Delete()
-                }
-
-                const Delete = (employee_id) => {
-
+                    inquirer.prompt(
+                        {
+                            type: "list",
+                            message: "Are you sure you want to permanently delete the employee'" +
+                            employee + "'? This cannot be undone.",
+                            name: "ConfirmDelete",
+                            choices: [
+                                "Yes, delete employee",
+                                "No"
+                            ]
+                        }
+                    ).then(function(confirm) {
+                        let ConfirmDelete = confirm.ConfirmDelete;
+                        if (ConfirmDelete === "Yes, delete employee") {
+                            connection.query(`DELETE FROM employee WHERE employee.id=${employe_id}`, 
+                            function(deleteErr) {
+                                if (deleteErr) throw deleteErr;
+                                console.log(`Employee '${employee}' has been deleted!`);
+                                Next();
+                            })
+                        } else if (ConfirmDelete === "No") {
+                            console.log(`Employee '${employee}' has not been deleted!`);
+                            Next();
+                        }
+                    })
                 }
             });
         });
