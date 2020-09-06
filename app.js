@@ -1,9 +1,9 @@
-const fs = require("fs");
 const inquirer = require("inquirer");
-const path = require("path");
 var mysql = require("mysql");
 const cTable = require('console.table');
 
+// An SQL table query specifically for displaying an employee's manager name, 
+// role title, salary and department name instead of their respective IDs.
 const EmployeeTableQuery = `
 SELECT employee.id, CONCAT(employee.first_name , ' ' , employee.last_name) AS name, 
 employee_role.title title, employee_role.salary, department.name department_name,
@@ -13,21 +13,38 @@ WHERE employee.manager_id=manager.id
 AND employee.role_id=employee_role.id
 AND employee_role.department_id=department.id`;
 
-const RoleTableQuery = `SELECT employee_role.id, 
+// An SQL table query specifically for displaying a role's department name instead of the ID.
+const RoleTableQuery = `
+SELECT employee_role.id, 
 employee_role.title, employee_role.salary, 
 department.name department_name
 FROM employee_role, department 
 WHERE employee_role.department_id=department.id`;
 
-const ManagerTableQuery = `
+// This Query returns all employees who are in either the manager or executive department.
+// This query is no long in use, but I would still like to use it for something.
+const ManagerExecutiveQuery = `
 SELECT employee.id, employee.first_name, employee.last_name FROM employee, employee_role, department 
 WHERE department.name='Management' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id 
 OR department.name='Executive' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id`;
 
+// This query returns all employees who have an id that is assigned to another employee's manager ID.
+// This query WILL return duplicates if a manager is assigned to more than 1 employee. 
+// So to fix this and make the array list a manager only once, we will have to use a map function to remove the duplicates.
+// This query is added to prevent future bugs from happening in case a manager switches roles/departments,
+// or if the manager is not actually a part of the management/executive department.
+// This query enables the feature of making any emplyee into a manager.
+const ManagerTableQuery = `
+SELECT manager.id, manager.first_name, manager.last_name 
+FROM employee manager, employee WHERE employee.manager_id=manager.id;`;
+
+// Queries all information for all departments. Used for general purposes.
 const DepartmetnQueryAll = `SELECT * FROM department`;
 
+// Queries all information for all roles. Used for general purposes.
 const RoleQueryAll = `SELECT * FROM employee_role`;
 
+// Queries all information for all employees. Used for general purposes.
 const EmployeeQueryAll = `SELECT * FROM employee`;
 
 // Creates connection to MySQL database
@@ -149,8 +166,12 @@ const ViewBy = (SelectQuery, PromptMsg, TableQuery) => {
             res.forEach((department) => {ChoicesArray.push(department.name)});
         } else if (TableQuery === "ViewEmployeesByRole" || TableQuery === "ViewUBRole") {
             res.forEach((role) => {ChoicesArray.push(role.title)});
-        } else if (TableQuery === "ViewEmployeesByManager" || TableQuery === "ViewSpecificEmployee") {
+        } else if (TableQuery === "ViewSpecificEmployee") {
             res.forEach((employee) => {ChoicesArray.push(employee.first_name + " " + employee.last_name)});
+        } else if (TableQuery === "ViewEmployeesByManager") {
+            //  This is a map function that removes duplicate managers from the manager array
+            res = [...new Map(res.map(manager => [manager.id, manager])).values()];
+            res.forEach((manager) => {ChoicesArray.push(manager.first_name + " " + manager.last_name)});
         }
         inquirer.prompt({
             type: "list",
@@ -331,38 +352,33 @@ const AddEmployee = () => {
                     }
                 });
             } else {
-                connection.query(ManagerTableQuery, function(error, result) {
-                    if (error) throw error;
-                    let ManagerArray = new Array();
-                    result.forEach((employee) => {ManagerArray.push(employee.first_name + " " + employee.last_name)});
-                    connection.query(RoleQueryAll, function(err, res) {
-                        if (err) throw err;
-                        let RoleArray = new Array();
-                        res.forEach((role) => {RoleArray.push(role.title)});
-                        inquirer.prompt([
-                            {
-                                type: "list",
-                                message: "Please select a role for the employee:",
-                                name: "role",
-                                choices: RoleArray
-                            },
-                            {
-                                type: "list",
-                                message: "Please select a manager for the employee:",
-                                name: "manager",
-                                choices: ManagerArray
-                            }
-                        ]).then(function(Newresponse) {
-                            let role_id = res[RoleArray.indexOf(Newresponse.role)].id;
-                            let manager_id = result[ManagerArray.indexOf(Newresponse.manager)].id;
-                            connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-                            VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id});`, 
-                            function(errormsg, resultmsg) {
-                                if (errormsg) throw errormsg;
-                                console.log(`Your new employee ${first_name} ${last_name} has been created!`);
-                                let NewEmployee = EmployeeTableQuery + ` AND employee.id=${resultmsg.insertId};`;
-                                QueryTable(NewEmployee);
-                            });
+                connection.query(RoleQueryAll, function(err, res) {
+                    if (err) throw err;
+                    let RoleArray = new Array();
+                    res.forEach((role) => {RoleArray.push(role.title)});
+                    inquirer.prompt([
+                        {
+                            type: "list",
+                            message: "Please select a role for the employee:",
+                            name: "role",
+                            choices: RoleArray
+                        },
+                        {
+                            type: "list",
+                            message: "Please select a manager for the employee:",
+                            name: "manager",
+                            choices: EmployeeArray
+                        }
+                    ]).then(function(Newresponse) {
+                        let role_id = res[RoleArray.indexOf(Newresponse.role)].id;
+                        let manager_id = empres[EmployeeArray.indexOf(Newresponse.manager)].id;
+                        connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
+                        VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id});`, 
+                        function(errormsg, resultmsg) {
+                            if (errormsg) throw errormsg;
+                            console.log(`Your new employee ${first_name} ${last_name} has been created!`);
+                            let NewEmployee = EmployeeTableQuery + ` AND employee.id=${resultmsg.insertId};`;
+                            QueryTable(NewEmployee);
                         });
                     });
                 });
@@ -599,11 +615,14 @@ const UpdateEmployee = () => {
                                 QueryUpdate(ColumnUpdate, Change);
                             })
                         });
+                    // Lets the user update their manager to any employee in the database. 
+                    // This is intentional incase the employee's manager is not in the management/executive department.
+                    // Or if the emplyee's manager is assigned to themselves like the defult CEO of this company. 
                     } else if (update === "Manager") {
                         ColumnUpdate = `manager_id`;
                         inquirer.prompt({
                             type: "list",
-                            message: "Please Select a New Role:",
+                            message: "Please Select a New Manager:",
                             name: "manager",
                             choices: EmployeeArray
                         }).then(function(managerResponse) {
@@ -628,6 +647,47 @@ const UpdateRole = () => {
 
 const DeleteEmployee = () => {
     console.log("Delete an Employee");
+    connection.query(EmployeeQueryAll, function(err, res) {
+        if (err) throw err;
+        let EmployeeArray = new Array();
+        res.forEach((employee) => {EmployeeArray.push(employee.first_name + " " + employee.last_name)});
+        inquirer.prompt({
+            type: "list",
+            message: "Please Select an Employee to Delete",
+            name: "employee",
+            choices: EmployeeArray
+        }).then(function(response) {
+            let employee = response.employee;
+            let index = EmployeeArray.indexOf(employee);
+            let employe_id = res[index].id;
+            connection.query(`SELECT employee.id, employee.manager_id FROM employee WHERE employee.manager_id=` + 
+            employe_id, function(error, result){
+                if (error) throw error;
+                console.log(result)
+                if (result.length > 0) {
+                    inquirer.prompt(
+                        {
+                            type: "list",
+                            message: "It looks like the employee '" + employee + 
+                            "' is a manager for 1 or more person. You will have to reassign ",
+                            name: "ReassignManager",
+                            choices: [
+                                "OK, lets reassign the manager",
+                                "Cancel"
+                            ]
+                        }
+                    )
+                } else {
+                    console.log("Not a manager!")
+                    Delete()
+                }
+
+                const Delete = (employee_id) => {
+
+                }
+            });
+        });
+    });
 }
 
 const DeleteDepartment = () => {
