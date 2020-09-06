@@ -671,7 +671,8 @@ const DeleteEmployee = () => {
                         {
                             type: "list",
                             message: "It looks like the employee '" + employee + 
-                            "' is a manager for 1 or more person. You will have to reassign managers for each employee first before deleting.",
+                            "' is a manager for 1 or more person. You will have to reassign " 
+                            + "managers for each employee first before deleting.",
                             name: "ReassignManager",
                             choices: [
                                 "OK"
@@ -738,9 +739,9 @@ const DeleteDepartment = () => {
                         {
                             type: "list",
                             message: "It looks like the department '" + department + 
-                            "' is assigned to 1 or more role/title. You will have to reassign these roles" + 
+                            "' is assigned to 1 or more role/title. You will have to reassign these roles " + 
                             "to a different department first before deleting.",
-                            name: "ReassignManager",
+                            name: "ReassignDepartment",
                             choices: [
                                 "OK"
                             ]
@@ -782,6 +783,68 @@ const DeleteDepartment = () => {
 
 const DeleteRole = () => {
     console.log("Delete a Role");
+    connection.query(RoleQueryAll, function(err, res) {
+        if (err) throw err;
+        let RoleArray = new Array();
+        res.forEach((role) => {RoleArray.push(role.title)});
+        inquirer.prompt({
+            type: "list",
+            message: "Please Select a Role to Delete",
+            name: "role",
+            choices: RoleArray
+        }).then(function(response) {
+            let role = response.role;
+            let index = RoleArray.indexOf(role);
+            let role_id = res[index].id;
+            connection.query(EmployeeTableQuery + ` AND employee.role_id=${role_id};`, function(error, result){
+                if (error) throw error;
+                if (result.length > 0) {
+                    const table = cTable.getTable(result)
+                    console.log(table);
+                    inquirer.prompt(
+                        {
+                            type: "list",
+                            message: "It looks like the role '" + role + 
+                            "' is assigned to 1 or more employee. You will have to reassign these employees " + 
+                            "to a different role first before deleting.",
+                            name: "ReassignRole",
+                            choices: [
+                                "OK"
+                            ]
+                        }
+                    ).then(function(){
+                        Next();
+                    })
+                } else {
+                    inquirer.prompt(
+                        {
+                            type: "list",
+                            message: "Are you sure you want to permanently delete the role'" +
+                            role + "'? This cannot be undone.",
+                            name: "ConfirmDelete",
+                            choices: [
+                                "Yes, delete role",
+                                "No"
+                            ]
+                        }
+                    ).then(function(confirm) {
+                        let ConfirmDelete = confirm.ConfirmDelete;
+                        if (ConfirmDelete === "Yes, delete role") {
+                            connection.query(`DELETE FROM employee_role WHERE employee_role.id=${role_id}`, 
+                            function(deleteErr) {
+                                if (deleteErr) throw deleteErr;
+                                console.log(`Role '${role}' has been deleted!`);
+                                Next();
+                            })
+                        } else if (ConfirmDelete === "No") {
+                            console.log(`Role '${role}' has not been deleted!`);
+                            Next();
+                        }
+                    })
+                }
+            });
+        });
+    });
 }
 
 const USDformatter = new Intl.NumberFormat('en-US', {
