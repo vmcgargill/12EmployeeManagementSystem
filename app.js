@@ -72,6 +72,8 @@ const MainMenu = () => {
             "Add a Department",
             "Add a Role",
             "Update an Employee",
+            "Update a Department",
+            "Update a Role",
             "Delete an Employee",
             "Delete a Department",
             "Delete a Role",
@@ -519,6 +521,101 @@ const AddRole = () => {
 
 const UpdateEmployee = () => {
     console.log("Update an Employee");
+    connection.query(EmployeeQueryAll, function(err, res) {
+        if (err) throw err;
+        let EmployeeArray = new Array();
+        res.forEach((employee) => {EmployeeArray.push(employee.first_name + " " + employee.last_name)});
+        inquirer.prompt({
+            type: "list",
+            message: "Please Select an Employee to Update",
+            name: "employee",
+            choices: EmployeeArray
+        }).then(function(response) {
+            let employee = response.employee;
+            let index = EmployeeArray.indexOf(employee);
+            let employe_id = res[index].id;
+
+            // Update function that passes in an employee's ID.
+            const Update = (employe_id) => {
+                inquirer.prompt(
+                    {
+                        type: "list",
+                        message: "Please Select an Option to Update the Employee '" + employee + "' on",
+                        name: "UpdateEmployee",
+                        choices: [
+                            "First Name",
+                            "Last Name",
+                            "Role/Title",
+                            "Manager"
+                        ]
+                    }
+                ).then(function(UpdateResponse) {
+                    let update = UpdateResponse.UpdateEmployee;
+                    let Change;
+                    let ColumnUpdate;
+
+                    // Query Update function that tkaes in the requested changes and submits them to the database.
+                    const QueryUpdate = (ColumnUpdate, Change) => {
+                        connection.query(`UPDATE employee SET employee.${ColumnUpdate}=` + Change + 
+                        ` WHERE employee.id=${employe_id};`, function(error) {
+                            if (error) throw error;
+                            console.log("Employee has been updated!");
+                            QueryTable(EmployeeTableQuery + ` AND employee.id=` + employe_id);
+                        });
+                    }
+
+                    // If statments that determines what the user is going to update and then passes it through the QueryUpdate() function.
+                    if (update === "First Name" || update === "Last Name") {
+                        inquirer.prompt(
+                            {
+                                type: "input",
+                                message: "Please Enter the Employee's New " + update + ":",
+                                name: "name"
+                            }
+                        ).then(function(nameResponse) {
+                            Change = `'${nameResponse.name}'`;
+                            if (update === "First Name") {
+                                ColumnUpdate = `first_name`;
+                                QueryUpdate(ColumnUpdate, Change);
+                            } else if (update === "Last Name") {
+                                ColumnUpdate = `last_name`;
+                                QueryUpdate(ColumnUpdate, Change);
+                            }
+                        });
+                    } else if (update === "Role/Title") {
+                        ColumnUpdate = `role_id`
+                        connection.query(RoleQueryAll, function(errRole, resRole) {
+                            let RoleArray = new Array();
+                            resRole.forEach((role) => {RoleArray.push(role.title)});
+                            if (errRole) throw errRole;
+                            inquirer.prompt({
+                                type: "list",
+                                message: "Please Select a New Role:",
+                                name: "role",
+                                choices: RoleArray
+                            }).then(function(roleResponse) {
+                                let NewRole = roleResponse.role;
+                                Change = resRole[RoleArray.indexOf(NewRole)].id
+                                QueryUpdate(ColumnUpdate, Change);
+                            })
+                        });
+                    } else if (update === "Manager") {
+                        ColumnUpdate = `manager_id`;
+                        inquirer.prompt({
+                            type: "list",
+                            message: "Please Select a New Role:",
+                            name: "manager",
+                            choices: EmployeeArray
+                        }).then(function(managerResponse) {
+                            Change = res[EmployeeArray.indexOf(managerResponse.manager)].id
+                            QueryUpdate(ColumnUpdate, Change);
+                        });
+                    }
+                });
+            }
+            Update(employe_id);
+        });
+    });
 }
 
 const UpdateDepartment = () => {
