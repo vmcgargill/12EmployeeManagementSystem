@@ -638,7 +638,62 @@ const UpdateEmployee = () => {
 }
 
 const UpdateDepartment = () => {
-    console.log("Update a Department");
+    console.log("Update a Department Name");
+    connection.query(DepartmetnQueryAll, function(err, res) {
+        if (err) throw err;
+        let DepartmentArray = new Array();
+        res.forEach((department) => {DepartmentArray.push(department.name)});
+        inquirer.prompt({
+            type: "list",
+            message: "Please Select a Department to Update",
+            name: "department",
+            choices: DepartmentArray
+        }).then(function(response) {
+            let department = response.department;
+            let index = DepartmentArray.indexOf(department);
+            let department_id = res[index].id;
+            const Update = (department_id) => {
+                inquirer.prompt(
+                    {
+                        type: "input",
+                        message: "Please enter a new name for the department",
+                        name: "UpdateDepartmentName"
+                    }
+                ).then(function(UpdateResponse) {
+                    let updateName = UpdateResponse.UpdateDepartmentName;
+                    let CheckIndex = DepartmentArray.indexOf(updateName);
+                    if (CheckIndex !== -1) {
+                        inquirer.prompt([
+                            {
+                                type: "list",
+                                message: "Error: It looks like the department '" + updateName + 
+                                "' already exists. This cannot duplicate. Please try again with a unique name.",
+                                name: "duplicate",
+                                choices: [
+                                    "OK",
+                                    "Cancel"
+                                ]
+                            }
+                        ]).then(function(newResponse) {
+                            if (newResponse.duplicate === "OK") {
+                                Update(department_id);
+                            } else if (newResponse.duplicate === "Cancel") {
+                                Next();
+                            }
+                        });
+                    } else {
+                        connection.query(`UPDATE department SET department.name='${updateName}' 
+                        WHERE department.id=${department_id};`, function(error) {
+                            if (error) throw error;
+                            console.log("Department has been updated!");
+                            QueryTable(`SELECT * FROM department WHERE department.id=` + department_id);
+                        });
+                    }
+                });
+            }
+            Update(department_id);
+        });
+    });
 }
 
 const UpdateRole = () => {
