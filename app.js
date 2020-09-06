@@ -714,6 +714,70 @@ const DeleteEmployee = () => {
 
 const DeleteDepartment = () => {
     console.log("Delete a Department");
+    connection.query(DepartmetnQueryAll, function(err, res) {
+        if (err) throw err;
+        let DepartmentArray = new Array();
+        res.forEach((department) => {DepartmentArray.push(department.name)});
+        inquirer.prompt({
+            type: "list",
+            message: "Please Select a Department to Delete",
+            name: "department",
+            choices: DepartmentArray
+        }).then(function(response) {
+            let department = response.department;
+            let index = DepartmentArray.indexOf(department);
+            let department_id = res[index].id;
+            connection.query(`SELECT employee_role.id, employee_role.title, employee_role.salary, department.name 
+            FROM employee_role, department WHERE employee_role.department_id=${department_id} 
+            AND department.id=employee_role.department_id`, function(error, result){
+                if (error) throw error;
+                if (result.length > 0) {
+                    const table = cTable.getTable(result)
+                    console.log(table);
+                    inquirer.prompt(
+                        {
+                            type: "list",
+                            message: "It looks like the department '" + department + 
+                            "' is assigned to 1 or more role/title. You will have to reassign these roles" + 
+                            "to a different department first before deleting.",
+                            name: "ReassignManager",
+                            choices: [
+                                "OK"
+                            ]
+                        }
+                    ).then(function(){
+                        Next();
+                    })
+                } else {
+                    inquirer.prompt(
+                        {
+                            type: "list",
+                            message: "Are you sure you want to permanently delete the department'" +
+                            department + "'? This cannot be undone.",
+                            name: "ConfirmDelete",
+                            choices: [
+                                "Yes, delete department",
+                                "No"
+                            ]
+                        }
+                    ).then(function(confirm) {
+                        let ConfirmDelete = confirm.ConfirmDelete;
+                        if (ConfirmDelete === "Yes, delete department") {
+                            connection.query(`DELETE FROM department WHERE department.id=${department_id}`, 
+                            function(deleteErr) {
+                                if (deleteErr) throw deleteErr;
+                                console.log(`Department '${department}' has been deleted!`);
+                                Next();
+                            })
+                        } else if (ConfirmDelete === "No") {
+                            console.log(`Department '${department}' has not been deleted!`);
+                            Next();
+                        }
+                    })
+                }
+            });
+        });
+    });
 }
 
 const DeleteRole = () => {
