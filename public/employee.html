@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+<body>
+  <!-- Nvbar -->
+  <div id="nav"></div>
+  <div class="container">
+    <h2>Empoyees</h2><br>
+    <!-- Employee Search -->
+    <input type="text" class="form-control" placeholder="Search By Name" id="SearchEmployee">
+    <!-- Filter Emplyee Dropdown -->
+    <div class="dropdown">
+      <a class="btn dropdown-toggle" href="#" role="button" id="FilterEmployees" 
+      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Filter Employees By...
+      </a>
+      <div class="dropdown-menu" aria-labelledby="FilterEmployees">
+        <a class="dropdown-item" id='FilterAllEmployees'>All Employees</a>
+        <a class="dropdown-item" id='FilterEmployeesByRole'>Title</a>
+        <a class="dropdown-item" id='FilterEmployeesByDepartment'>Department</a>
+        <a class="dropdown-item" id='FilterEmployeesByManager'>Manager</a>
+      </div>
+    </div>
+    <!-- Select Item to Filter By -->
+    <div id="SelectFilter"></div>
+    <!-- Employee Table -->
+    <div id="table"></div>
+  </div>
+  <!-- Footer -->
+  <div id="footer"></div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="scripts/load.js"></script>
+<script src="scripts/employee.js"></script>
+</html>
