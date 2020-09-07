@@ -537,6 +537,7 @@ const AddRole = () => {
     });
 }
 
+// Updates current employees by first name, last name, role, or by their manager
 const UpdateEmployee = () => {
     console.log("Update an Employee");
     connection.query(EmployeeQueryAll, function(err, res) {
@@ -668,6 +669,7 @@ const UpdateEmployee = () => {
     });
 }
 
+// Updates current departments by their name only
 const UpdateDepartment = () => {
     console.log("Update a Department Name");
     connection.query(DepartmetnQueryAll, function(err, res) {
@@ -727,6 +729,7 @@ const UpdateDepartment = () => {
     });
 }
 
+// Updates current roles by their title, salary, or department
 const UpdateRole = () => {
     console.log("Update a Role");
     connection.query(RoleQueryAll, function(err, res) {
@@ -862,6 +865,7 @@ const UpdateRole = () => {
     });
 }
 
+// Deletes employees from the database. Does not delete current managers, makes user change the manager first.
 const DeleteEmployee = () => {
     console.log("Delete an Employee");
     connection.query(EmployeeQueryAll, function(err, res) {
@@ -930,6 +934,7 @@ const DeleteEmployee = () => {
     });
 }
 
+// Deletes departments from database. Does not delete departments when currently assigned to a role.
 const DeleteDepartment = () => {
     console.log("Delete a Department");
     connection.query(DepartmetnQueryAll, function(err, res) {
@@ -998,6 +1003,7 @@ const DeleteDepartment = () => {
     });
 }
 
+// Deletes roles from database. Does not delete roles when currently assigned to employees.
 const DeleteRole = () => {
     console.log("Delete a Role");
     connection.query(RoleQueryAll, function(err, res) {
@@ -1064,6 +1070,7 @@ const DeleteRole = () => {
     });
 }
 
+// A function that converts integer into USD currency format for calculating utilized budget.
 const USDformatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
