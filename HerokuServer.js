@@ -1,6 +1,7 @@
 const PORT = process.env.PORT || 8080;
 const username = process.env.username;
 const password = process.env.password;
+const database = process.env.database;
 const express = require("express");
 const EmployeeMGMTServer = express();
 const path = require("path");
@@ -45,7 +46,7 @@ const connection = mysql.createConnection({
     port: 3306,
     user: username,
     password: password,
-    database: "heroku_caff93f58aec463"
+    database: database
 });
 
 // For testing purposes only
