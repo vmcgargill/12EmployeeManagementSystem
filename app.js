@@ -1,6 +1,8 @@
 const inquirer = require("inquirer");
 var mysql = require("mysql");
 const cTable = require('console.table');
+const path = require("path");
+
 
 // An SQL table query specifically for displaying an employee's manager name, 
 // role title, salary and department name instead of their respective IDs.
@@ -483,22 +485,22 @@ const AddRole = () => {
                         }
                     ]).then(function(salaryResponse) {
                         let salary = salaryResponse.salary;
-                        if (salary === NaN) {
+                        if (Number.isNaN(salary) === true) {
                             inquirer.prompt([
                                 {
                                     type: "list",
-                                    message: "It looks like '" + salary + 
-                                    "' is not an integer. The salary value must be an integer. Please try again.",
-                                    name: "duplicate",
+                                    message: "It looks like the value you entered is not an integer. " +
+                                    "The salary value must be an integer. Please try again",
+                                    name: "salary",
                                     choices: [
                                         "OK",
                                         "Cancel"
                                     ]
                                 }
                             ]).then(function(newResponse) {
-                                if (newResponse.duplicate === "OK") {
+                                if (newResponse.salary === "OK") {
                                     EnterSalary();
-                                } else if (newResponse.duplicate === "Cancel") {
+                                } else if (newResponse.salary === "Cancel") {
                                     Next();
                                 }
                             });
@@ -659,6 +661,7 @@ const UpdateEmployee = () => {
                     }
                 }
                 Update(employe_id);
+
             });
 
         });
@@ -726,6 +729,137 @@ const UpdateDepartment = () => {
 
 const UpdateRole = () => {
     console.log("Update a Role");
+    connection.query(RoleQueryAll, function(err, res) {
+        if (err) throw err;
+        let RoleArray = new Array();
+        res.forEach((role) => {RoleArray.push(role.title)});
+        inquirer.prompt({
+            type: "list",
+            message: "Please Select a Role to Update",
+            name: "role",
+            choices: RoleArray
+        }).then(function(response) {
+            let role = response.role;
+            let index = RoleArray.indexOf(role);
+            let role_id = res[index].id;
+            inquirer.prompt(
+                {
+                    type: "list",
+                    message: "Please Select an Option to Update the Role '" + role + "' on",
+                    name: "UpdateRole",
+                    choices: [
+                        "Title",
+                        "Salary",
+                        "Department"
+                    ]
+                }
+            ).then(function(UpdateResponse) {
+                let update = UpdateResponse.UpdateRole;
+
+                // Query Update function that takes in the requested changes and submits them to the database.
+                const QueryUpdate = (ColumnUpdate, ValueUpdate, role_id) => {
+                    connection.query(`UPDATE employee_role SET employee_role.${ColumnUpdate}=` + ValueUpdate + 
+                    ` WHERE employee_role.id=${role_id};`, function(error) {
+                        if (error) throw error;
+                        console.log("Role has been updated!");
+                        QueryTable(RoleTableQuery + ` AND employee_role.id=` + role_id);
+                    });
+                }
+
+                // Update function that passes in a role's ID.
+                const Update = (role_id) => {
+                    if (update === "Title") {
+                        inquirer.prompt(
+                            {
+                                type: "input",
+                                message: "Please Enter the Role's New " + update + ":",
+                                name: "title"
+                            }
+                        ).then(function(titleResponse) {
+                            let ValueUpdate = `'${titleResponse.title}'`;
+                            let ColumnUpdate = 'title';
+                            let NewName = titleResponse.title;
+                            let CheckTitleIndex = RoleArray.indexOf(NewName);
+                            if (CheckTitleIndex !== -1) {
+                                inquirer.prompt(
+                                    {
+                                        type: "list",
+                                        message: "Error: It looks like their is already a role by the name of '" + NewName + 
+                                       "'. There cannot be duplicates. Please alter the title and try again.",
+                                        name: "duplicate",
+                                        choices: [
+                                            "OK",
+                                            "Cancel"
+                                        ]
+                                    }
+                                ).then(function(duplicateResponse) {
+                                    let duplicate = duplicateResponse.duplicate;
+                                    if (duplicate === "OK") {
+                                        Update(role_id);
+                                    } else if (duplicate === "Cancel") {
+                                        Next();
+                                    }
+                                });
+                            } else {
+                                QueryUpdate(ColumnUpdate, ValueUpdate, role_id);
+                            }
+                        });
+                    } else if (update === "Salary") {
+                        let ColumnUpdate = `salary`;
+                        inquirer.prompt(
+                            {
+                                type: "number",
+                                message: "Please enter a salary amount for this role:",
+                                name: "salary"
+                            }
+                        ).then(function(salaryResponse) {
+                            let salary = salaryResponse.salary;
+                            if (Number.isNaN(salary) === true) {
+                                inquirer.prompt([
+                                    {
+                                        type: "list",
+                                        message: "It looks like the value you entered is not an integer. " +
+                                        "The salary value must be an integer. Please try again",
+                                        name: "nonInt",
+                                        choices: [
+                                            "OK",
+                                            "Cancel"
+                                        ]
+                                    }
+                                ]).then(function(newResponse) {
+                                    if (newResponse.nonInt === "OK") {
+                                        Update(role_id);
+                                    } else if (newResponse.nonInt === "Cancel") {
+                                        Next();
+                                    }
+                                });
+                            } else {
+                                QueryUpdate(ColumnUpdate, salary, role_id);
+                            }
+                        });
+                    } else if (update === "Department") {
+                        let ColumnUpdate = `department_id`
+                        connection.query(DepartmetnQueryAll, function(errDep, resDep) {
+                            let DepartmentArray = new Array();
+                            resDep.forEach((department) => {DepartmentArray.push(department.name)});
+                            if (errDep) throw errDep;
+                            inquirer.prompt({
+                                type: "list",
+                                message: "Please Select a New Department:",
+                                name: "department",
+                                choices: DepartmentArray
+                            }).then(function(roleResponse) {
+                                let NewDepartment = roleResponse.department;
+                                let ValueUpdate = resDep[DepartmentArray.indexOf(NewDepartment)].id
+                                QueryUpdate(ColumnUpdate, ValueUpdate, role_id);
+                            })
+                        });
+                    }
+                }
+                Update(role_id);
+            });
+        });
+    });
 }
 
 const DeleteEmployee = () => {
