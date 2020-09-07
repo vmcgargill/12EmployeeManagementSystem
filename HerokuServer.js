@@ -44,7 +44,7 @@ AND employee_role.department_id=`
 // Creates connection to MySQL database
 const connection = mysql.createConnection({
     host: host,
-    port: 3306,
+    port: PORT,
     user: username,
     password: password,
     database: database
