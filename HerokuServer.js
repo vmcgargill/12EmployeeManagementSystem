@@ -2,6 +2,7 @@ const PORT = process.env.PORT || 8080;
 const username = process.env.username;
 const password = process.env.password;
 const database = process.env.database;
+const host = process.env.host;
 const express = require("express");
 const EmployeeMGMTServer = express();
 const path = require("path");
@@ -42,7 +43,7 @@ AND employee_role.department_id=`
 // For heroku deployment
 // Creates connection to MySQL database
 const connection = mysql.createConnection({
-    host: "localhost",
+    host: host,
     port: 3306,
     user: username,
     password: password,
