@@ -1,2 +1,6 @@
 # 12EmployeeManagementSystem
-12th assignment in DU bootcamp
+An app that allows user to view, add, update, and delete from an employee database.
+
+![Command Line](./gifs/employeemanagementsystemapp.gif)
+
+![Front End](./gifs/employeemanagementsystemserver.gif)

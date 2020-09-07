@@ -42,22 +42,22 @@ AND employee_role.department_id=`
 
 // For heroku deployment
 // Creates connection to MySQL database
-const connection = mysql.createConnection({
-    host: host,
-    port: 3306,
-    user: username,
-    password: password,
-    database: database
-});
+// const connection = mysql.createConnection({
+//     host: host,
+//     port: 3306,
+//     user: username,
+//     password: password,
+//     database: database
+// });
 
 // For testing purposes only
-// const connection = mysql.createConnection({
-//     host: "localhost",
-//     port: 3306,
-//     user: "root",
-//     password: "password",
-//     database: "employee_db"
-// });
+const connection = mysql.createConnection({
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "password",
+    database: "employee_db"
+});
 
 // Connects to MySQL database and initializes the start of the app
 connection.connect(function(err) {
