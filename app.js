@@ -1,7 +1,6 @@
 const inquirer = require("inquirer");
 var mysql = require("mysql");
 const cTable = require('console.table');
-const path = require("path");
 
 
 // An SQL table query specifically for displaying an employee's manager name, 
@@ -85,6 +84,7 @@ const MainMenu = () => {
             "View Employees By Role",
             "View Employees by Department",
             "View Employees by Manager",
+            "View Total Utilized Budget of Entire Company",
             "View Utilized Budget of a Department",
             "View Utilized Budget of a Role",
             "Add an Employee",
@@ -109,6 +109,7 @@ const MainMenu = () => {
         else if (start === "View Employees By Role") ViewEmployeesByRole();
         else if (start === "View Employees by Department") ViewEmployeesByDepartment();
         else if (start === "View Employees by Manager") ViewEmployeesByManager();
+        else if (start === "View Total Utilized Budget of Entire Company") ViewTotalUB();
         else if (start === "View Utilized Budget of a Department") ViewUBDepartment();
         else if (start === "View Utilized Budget of a Role") ViewUBRole();
         else if (start === "Add an Employee") AddEmployee();
@@ -309,6 +310,19 @@ const ViewUBRole = () => {
     const PromptMsg = "Please Select a Role to View the Utilized Budget By:";
     const TableQuery = "ViewUBRole";
     ViewBy(SelectQuery, PromptMsg, TableQuery);
+}
+
+// Views the total utilized budget for ALL employees
+const ViewTotalUB = () => {
+    console.log("View Total Utilized Budget of Entire Company");
+    connection.query(`SELECT employee_role.salary FROM employee_role, employee 
+    WHERE employee_role.id=employee.role_id`, function(err, res) {
+        if (err) throw err;
+        var SumUtilizedBudget = 0;
+        res.forEach((employee) => SumUtilizedBudget += employee.salary)
+        console.log("Current budget for the entire company is: " + USDformatter.format(SumUtilizedBudget));
+        Next()
+    })
 }
 
 // Creates a new employee and adds it to the database
