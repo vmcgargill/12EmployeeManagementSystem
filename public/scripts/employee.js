@@ -245,5 +245,8 @@ $('#FilterEmployeesByManager').on('click', function() {
     FilterEmployeesByManager();
 });
 
-FilterAllEmployees();
+$(document).ready(function() {
+  FilterAllEmployees();
+});
+
   

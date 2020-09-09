@@ -1,8 +1,4 @@
 const PORT = process.env.PORT || 8080;
-const username = process.env.username;
-const password = process.env.password;
-const database = process.env.database;
-const host = process.env.host;
 const express = require("express");
 const EmployeeMGMTServer = express();
 const path = require("path");
@@ -39,16 +35,6 @@ WHERE employee_role.id=employee.role_id`;
 const UtilizedBudgetDepartment = `SELECT employee_role.salary FROM employee, employee_role, department 
 WHERE employee.role_id=employee_role.id AND employee_role.department_id=department.id 
 AND employee_role.department_id=`
-
-// For heroku deployment
-// Creates connection to MySQL database
-// const connection = mysql.createConnection({
-//     host: host,
-//     port: 3306,
-//     user: username,
-//     password: password,
-//     database: database
-// });
 
 // For testing purposes only
 const connection = mysql.createConnection({
