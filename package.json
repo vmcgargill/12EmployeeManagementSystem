@@ -1,7 +1,7 @@
 {
   "name": "12employeemanagementsystem",
   "version": "1.0.0",
-  "description": "An app the manages a employee database",
+  "description": "Employee Managment App that allows user to manag employee database",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,7 +16,7 @@
     "Management",
     "System"
   ],
-  "author": "Vincent J McGargill",
+  "author": "Vincent McGargill",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/vmcgargill/12EmployeeManagementSystem/issues"
@@ -24,7 +24,6 @@
   "homepage": "https://github.com/vmcgargill/12EmployeeManagementSystem#readme",
   "dependencies": {
     "console.table": "^0.10.0",
-    "express": "^4.17.1",
     "inquirer": "^7.3.3",
     "mysql": "^2.18.1"
   }

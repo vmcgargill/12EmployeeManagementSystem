@@ -2,7 +2,6 @@ const inquirer = require("inquirer");
 var mysql = require("mysql");
 const cTable = require('console.table');
 
-
 // An SQL table query specifically for displaying an employee's manager name, 
 // role title, salary and department name instead of their respective IDs.
 const EmployeeTableQuery = `
