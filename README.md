@@ -46,7 +46,7 @@ To see a YouTube video of a demonstration of the front end version:
 
 Also, see the gif of the front end in use:
 
-![Command Line](./gifs/employeemanagementsystemapp.gif)
+![Front End](./gifs/employeemanagementsystemserver.gif)
 
 ## Features
 
@@ -79,7 +79,7 @@ See the following link for a YouTube video demonstrating this application in use
 
 You may also see the gif of this app in action:
 
-![Back End](./gifs/employeemanagementsystemserver.gif)
+![Command Line](./gifs/employeemanagementsystemapp.gif)
 
 ### Functions in app.js
 This section contains information about the functions used in the app.js file to create this app and make it interactive so the user may view, add, update, and delete tables in the employee_db database.
