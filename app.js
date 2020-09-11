@@ -21,13 +21,6 @@ department.name department_name
 FROM employee_role, department 
 WHERE employee_role.department_id=department.id`;
 
-// This Query returns all employees who are in either the manager or executive department.
-// This query is no long in use, but I would still like to use it for something.
-const ManagerExecutiveQuery = `
-SELECT employee.id, employee.first_name, employee.last_name FROM employee, employee_role, department 
-WHERE department.name='Management' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id 
-OR department.name='Executive' AND employee_role.id=employee.role_id AND department.id=employee_role.department_id`;
-
 // This query returns all employees who have an id that is assigned to another employee's manager ID.
 // This query WILL return duplicates if a manager is assigned to more than 1 employee. 
 // So to fix this and make the array list a manager only once, we will have to use a map function to remove the duplicates.
