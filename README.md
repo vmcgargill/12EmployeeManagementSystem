@@ -1,10 +1,9 @@
+# EmployeeManagementSystem
+
 [![License: NPM Inquirer package](https://img.shields.io/badge/License-NPM%20Inquirer%20Package-green.svg)](https://www.npmjs.com/package/inquirer)
 
 [![License: NPM console.table package](https://img.shields.io/badge/License-Console%20Table%20Package-green.svg)](https://www.npmjs.com/package/console.table)
  
-
-# 12EmployeeManagementSystem
-
 ## Description 
 An app that allows a user to view, add, update, and delete a company employee database.
 
